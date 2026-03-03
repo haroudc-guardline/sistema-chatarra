@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 
 // POST handler to create a new waste type
 export async function POST(request: Request) {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
