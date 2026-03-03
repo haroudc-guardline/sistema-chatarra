@@ -1,5 +1,5 @@
 import { LucideIcon } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 interface StatCardProps {
@@ -20,46 +20,42 @@ export function StatCard({
   value,
   icon: Icon,
   description,
-  trend,
   className,
   onClick,
 }: StatCardProps) {
   return (
     <Card
       className={cn(
-        'transition-all duration-200',
-        onClick && 'cursor-pointer hover:shadow-md hover:border-slate-300',
+        'group bg-white/70 backdrop-blur-md border-white/50 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-300/50 hover:bg-white/90 transition-all duration-300 overflow-hidden relative',
+        onClick && 'cursor-pointer',
         className
       )}
       onClick={onClick}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-slate-600">
-          {title}
-        </CardTitle>
-        <div className="h-8 w-8 rounded-md bg-emerald-100 flex items-center justify-center">
-          <Icon className="h-4 w-4 text-emerald-600" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-slate-900">{value}</div>
-        {(description || trend) && (
-          <div className="flex items-center gap-2 mt-1">
-            {trend && (
-              <span
-                className={cn(
-                  'text-xs font-medium',
-                  trend.isPositive ? 'text-emerald-600' : 'text-red-600'
-                )}
-              >
-                {trend.isPositive ? '+' : ''}{trend.value}%
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-600/0 via-red-600/0 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      <CardContent className="p-6 relative z-10">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+              {title}
+            </p>
+            <div className="mt-3">
+              <span className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                {value}
               </span>
-            )}
+            </div>
             {description && (
-              <p className="text-xs text-slate-500">{description}</p>
+              <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+                {description}
+              </p>
             )}
           </div>
-        )}
+          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg shadow-red-500/20 group-hover:shadow-red-500/30 group-hover:scale-110 transition-all duration-300">
+            <Icon className="h-6 w-6 text-white" />
+          </div>
+        </div>
       </CardContent>
     </Card>
   )
