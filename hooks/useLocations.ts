@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { locationService } from '@/lib/services/location-service'
-import type { Location, LocationWithDetails } from '@/types/database'
+import type { Location, LocationWithDetails, WasteType } from '@/types/database'
 
 interface LocationFilters {
   ciudad?: string
