@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { locationService } from '@/lib/services/location-service'
 
 type RouteContext = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export async function GET(request: NextRequest, { params }: any) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const location = await locationService.getLocationById(parseInt(params.id))
+    const { id } = await context.params
+    const location = await locationService.getLocationById(parseInt(id))
     return NextResponse.json({ data: location })
   } catch (error) {
     console.error('Error fetching location:', error)
@@ -20,10 +21,11 @@ export async function GET(request: NextRequest, { params }: any) {
   }
 }
 
-export async function PUT(request: NextRequest, { params }: any) {
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
+    const { id } = await context.params
     const body = await request.json()
-    const location = await locationService.updateLocation(parseInt(params.id), body)
+    const location = await locationService.updateLocation(parseInt(id), body)
     return NextResponse.json({ data: location })
   } catch (error) {
     console.error('Error updating location:', error)
@@ -34,9 +36,10 @@ export async function PUT(request: NextRequest, { params }: any) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: any) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    await locationService.deleteLocation(parseInt(params.id))
+    const { id } = await context.params
+    await locationService.deleteLocation(parseInt(id))
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting location:', error)

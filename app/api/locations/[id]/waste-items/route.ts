@@ -4,8 +4,9 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,7 +23,7 @@ export async function GET(
   const { data: wasteItems, error } = await supabase
     .from('waste_items')
     .select('*, waste_types(*)')
-    .eq('location_id', params.id)
+    .eq('location_id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -33,8 +34,9 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,7 +54,7 @@ export async function POST(
 
   const { data: newWasteItem, error } = await supabase
     .from('waste_items')
-    .insert({ ...body, location_id: params.id })
+    .insert({ ...body, location_id: id })
     .select()
     .single()
 
