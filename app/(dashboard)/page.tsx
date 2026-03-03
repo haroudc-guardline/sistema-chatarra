@@ -151,69 +151,81 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Quick Actions - Diseño Moderno 2026 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Quick Actions - Diseño Vertical con Iconos Arriba */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/map">
-          <Card className="group bg-gradient-to-br from-blue-600/10 to-blue-800/5 backdrop-blur-md border-blue-200/50 hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-400/50 transition-all duration-300 cursor-pointer h-full overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/5 to-blue-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <CardContent className="p-6 relative z-10">
-              <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300">
-                  <MapPin className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg text-slate-800 group-hover:text-blue-700 transition-colors">Ver Mapa</h3>
-                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-                    Visualiza todas las ubicaciones en el mapa interactivo
-                  </p>
-                  <div className="flex items-center gap-1 text-blue-700 text-sm mt-3 font-medium group-hover:gap-2 transition-all">
-                    Ir al mapa <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
+          <Card className="group relative overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-full">
+            {/* Background Image */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900" />
+            <div 
+              className="absolute inset-0 opacity-20 mix-blend-overlay"
+              style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?q=80&w=1000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center' }}
+            />
+            {/* Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            
+            <CardContent className="relative z-10 p-8 flex flex-col items-center text-center text-white">
+              <div className="h-20 w-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl">
+                <MapPin className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="font-bold text-2xl mb-3 group-hover:scale-105 transition-transform">Ver Mapa</h3>
+              <p className="text-blue-100 text-sm leading-relaxed mb-6">
+                Visualiza todas las ubicaciones en el mapa interactivo con filtros avanzados
+              </p>
+              <div className="mt-auto flex items-center gap-2 text-sm font-medium bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full group-hover:bg-white/30 transition-colors">
+                Explorar <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/locations">
-          <Card className="group bg-gradient-to-br from-red-600/10 to-red-800/5 backdrop-blur-md border-red-200/50 hover:shadow-xl hover:shadow-red-500/10 hover:border-red-400/50 transition-all duration-300 cursor-pointer h-full overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 via-red-600/5 to-red-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <CardContent className="p-6 relative z-10">
-              <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-500/25 group-hover:scale-110 transition-transform duration-300">
-                  <Building2 className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg text-slate-800 group-hover:text-red-700 transition-colors">Ver Ubicaciones</h3>
-                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-                    Lista completa de todas las instituciones registradas
-                  </p>
-                  <div className="flex items-center gap-1 text-red-700 text-sm mt-3 font-medium group-hover:gap-2 transition-all">
-                    Ver lista <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
+          <Card className="group relative overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-full">
+            {/* Background Image */}
+            <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-red-700 to-red-900" />
+            <div 
+              className="absolute inset-0 opacity-20 mix-blend-overlay"
+              style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center' }}
+            />
+            {/* Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            
+            <CardContent className="relative z-10 p-8 flex flex-col items-center text-center text-white">
+              <div className="h-20 w-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl">
+                <Building2 className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="font-bold text-2xl mb-3 group-hover:scale-105 transition-transform">Ver Ubicaciones</h3>
+              <p className="text-red-100 text-sm leading-relaxed mb-6">
+                Lista completa de instituciones con detalles de residuos y documentos
+              </p>
+              <div className="mt-auto flex items-center gap-2 text-sm font-medium bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full group-hover:bg-white/30 transition-colors">
+                Ver lista <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/import">
-          <Card className="group bg-gradient-to-br from-purple-600/10 to-purple-800/5 backdrop-blur-md border-purple-200/50 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-400/50 transition-all duration-300 cursor-pointer h-full overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/5 to-purple-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <CardContent className="p-6 relative z-10">
-              <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/25 group-hover:scale-110 transition-transform duration-300">
-                  <Upload className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg text-slate-800 group-hover:text-purple-700 transition-colors">Importar Datos</h3>
-                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-                    Carga masiva de ubicaciones desde Excel o CSV
-                  </p>
-                  <div className="flex items-center gap-1 text-purple-700 text-sm mt-3 font-medium group-hover:gap-2 transition-all">
-                    Importar <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
+          <Card className="group relative overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-full">
+            {/* Background Image */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900" />
+            <div 
+              className="absolute inset-0 opacity-20 mix-blend-overlay"
+              style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center' }}
+            />
+            {/* Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            
+            <CardContent className="relative z-10 p-8 flex flex-col items-center text-center text-white">
+              <div className="h-20 w-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl">
+                <Upload className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="font-bold text-2xl mb-3 group-hover:scale-105 transition-transform">Importar Datos</h3>
+              <p className="text-purple-100 text-sm leading-relaxed mb-6">
+                Carga masiva de ubicaciones desde archivos Excel o CSV de forma rápida
+              </p>
+              <div className="mt-auto flex items-center gap-2 text-sm font-medium bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full group-hover:bg-white/30 transition-colors">
+                Importar <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </CardContent>
           </Card>
