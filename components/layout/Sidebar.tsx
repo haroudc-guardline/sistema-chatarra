@@ -150,7 +150,7 @@ function SidebarContent({
 
               if (isCollapsed) {
                 return (
-                  <Tooltip key={item.href} placement="right">
+                  <Tooltip key={item.href}>
                     <TooltipTrigger asChild>
                       {LinkContent}
                     </TooltipTrigger>
