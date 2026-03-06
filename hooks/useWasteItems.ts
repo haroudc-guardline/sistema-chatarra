@@ -77,11 +77,14 @@ export function useWasteItems(locationId: number) {
   const deleteWasteItem = useCallback(async (id: number) => {
     setIsDeleting(true)
     try {
-      const response = await fetch(`/api/locations/${locationId}/waste-items/${id}`, {
+      const response = await fetch(`/api/locations/${locationId}/waste-items?itemId=${id}`, {
         method: 'DELETE',
       })
       
-      if (!response.ok) throw new Error('Failed to delete waste item')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete waste item')
+      }
       
       setWasteItems(prev => prev.filter(item => item.id !== id))
     } catch (error) {
