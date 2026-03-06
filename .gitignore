@@ -42,3 +42,6 @@ next-env.d.ts
 
 # recursive copy
 Documents/
+
+.vercel
+.env*.local

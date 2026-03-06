@@ -40,7 +40,7 @@ export function EmptyState({
       <div className="flex flex-col sm:flex-row gap-3">
         {action && (
           <Link href={action.href}>
-            <Button className="bg-emerald-500 hover:bg-emerald-600">
+            <Button className="bg-red-600 hover:bg-red-700">
               {action.icon && <action.icon className="mr-2 h-4 w-4" />}
               {action.label}
             </Button>

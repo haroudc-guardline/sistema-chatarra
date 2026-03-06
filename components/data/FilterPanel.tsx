@@ -87,7 +87,7 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
           <Filter className="h-4 w-4 text-slate-500" />
           <span className="font-medium text-slate-700">Filtros</span>
           {activeFiltersCount > 0 && (
-            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="bg-red-100 text-red-800">
               {activeFiltersCount}
             </Badge>
           )}
@@ -192,7 +192,7 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
                 className={cn(
                   'cursor-pointer transition-colors',
                   localFilters.wasteTypeIds?.includes(type.id)
-                    ? 'bg-emerald-500 hover:bg-emerald-600'
+                    ? 'bg-red-600 hover:bg-red-700'
                     : 'hover:bg-slate-100'
                 )}
                 onClick={() => toggleWasteType(type.id)}
@@ -207,7 +207,7 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button onClick={handleApply} className="flex-1 bg-emerald-500 hover:bg-emerald-600">
+          <Button onClick={handleApply} className="flex-1 bg-red-600 hover:bg-red-700">
             Aplicar
           </Button>
           <Button variant="outline" onClick={handleReset}>

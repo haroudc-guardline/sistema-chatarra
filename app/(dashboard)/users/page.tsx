@@ -101,7 +101,7 @@ export default function UsersPage() {
             checked={user.activo}
             onCheckedChange={() => toggleUserStatus({ id: user.id, activo: !user.activo })}
           />
-          <span className={user.activo ? 'text-emerald-600' : 'text-slate-400'}>
+          <span className={user.activo ? 'text-red-700' : 'text-slate-400'}>
             {user.activo ? 'Activo' : 'Inactivo'}
           </span>
         </div>
@@ -157,7 +157,7 @@ export default function UsersPage() {
           </p>
         </div>
         <Link href="/users/new">
-          <Button className="bg-emerald-500 hover:bg-emerald-600">
+          <Button className="bg-red-600 hover:bg-red-700">
             <Plus className="mr-2 h-4 w-4" />
             Nuevo Usuario
           </Button>

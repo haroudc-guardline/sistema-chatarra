@@ -76,7 +76,7 @@ export function CreatableWasteTypeSelect({
             variant={selectedIds.includes(type.id) ? 'default' : 'outline'}
             className={`cursor-pointer select-none ${
               selectedIds.includes(type.id)
-                ? 'bg-emerald-500 hover:bg-emerald-600'
+                ? 'bg-red-600 hover:bg-red-700'
                 : 'hover:bg-slate-100'
             }`}
             onClick={() => toggleWasteType(type.id)}

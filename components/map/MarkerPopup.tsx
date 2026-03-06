@@ -12,8 +12,8 @@ export function MarkerPopup({ location }: MarkerPopupProps) {
     <Card className="w-full max-w-sm">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-            <MapPin className="h-5 w-5 text-emerald-600" />
+          <div className="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+            <MapPin className="h-5 w-5 text-red-700" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-slate-900 truncate">
@@ -59,7 +59,7 @@ export function MarkerPopup({ location }: MarkerPopupProps) {
                 <Badge
                   key={wt.id}
                   variant="secondary"
-                  className="text-xs bg-emerald-100 text-emerald-700"
+                  className="text-xs bg-red-100 text-red-800"
                 >
                   {wt.nombre}
                 </Badge>
@@ -70,7 +70,7 @@ export function MarkerPopup({ location }: MarkerPopupProps) {
 
         <a
           href={`/locations/${location.id}`}
-          className="mt-4 block w-full text-center py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition-colors"
+          className="mt-4 block w-full text-center py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
         >
           Ver Detalles
         </a>

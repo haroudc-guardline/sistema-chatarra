@@ -82,7 +82,7 @@ export function FileUpload({
 
   const getFileIcon = (file: File) => {
     if (file.type.startsWith('image/')) {
-      return <ImageIcon className="h-8 w-8 text-emerald-500" />
+      return <ImageIcon className="h-8 w-8 text-red-600" />
     }
     return <FileIcon className="h-8 w-8 text-blue-500" />
   }
@@ -95,7 +95,7 @@ export function FileUpload({
         className={cn(
           'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
           isDragActive
-            ? 'border-emerald-500 bg-emerald-50'
+            ? 'border-red-600 bg-red-50'
             : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50',
           files.length >= maxFiles && 'opacity-50 cursor-not-allowed'
         )}
@@ -103,7 +103,7 @@ export function FileUpload({
         <input {...getInputProps()} disabled={files.length >= maxFiles} />
         <Upload className="h-10 w-10 text-slate-400 mx-auto mb-4" />
         {isDragActive ? (
-          <p className="text-emerald-600 font-medium">Suelta los archivos aquí...</p>
+          <p className="text-red-700 font-medium">Suelta los archivos aquí...</p>
         ) : (
           <>
             <p className="text-slate-600 font-medium">

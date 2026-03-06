@@ -48,7 +48,7 @@ export function PageHeader({
 
               const buttonVariant = action.primary ? "default" : (action.variant || "outline")
               const buttonClass = action.primary 
-                ? "bg-emerald-500 hover:bg-emerald-600" 
+                ? "bg-red-600 hover:bg-red-700" 
                 : ""
 
               if (action.href) {

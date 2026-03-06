@@ -72,7 +72,7 @@ export default function LoginPage() {
     <Card className="w-full shadow-lg">
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-4">
-          <div className="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+          <div className="h-12 w-12 bg-red-600 rounded-xl flex items-center justify-center">
             <Trash2 className="h-7 w-7 text-white" />
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               onClick={() => console.log('Button clicked')}
-              className="w-full bg-emerald-500 hover:bg-emerald-600"
+              className="w-full bg-red-600 hover:bg-red-700"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -151,7 +151,7 @@ export default function LoginPage() {
       <CardFooter className="flex justify-center">
         <Link
           href="/forgot-password"
-          className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline"
+          className="text-sm text-red-700 hover:text-red-800 hover:underline"
         >
           ¿Olvidaste tu contraseña?
         </Link>

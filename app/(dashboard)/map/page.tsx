@@ -96,23 +96,23 @@ export default function MapPage() {
 
             {/* Selected Location Info */}
             {selectedLocation && (
-              <div className="mt-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium text-emerald-900 text-sm">
+                    <p className="font-medium text-red-950 text-sm">
                       {selectedLocation.nombre_institucion}
                     </p>
-                    <p className="text-xs text-emerald-700 mt-1">
+                    <p className="text-xs text-red-800 mt-1">
                       {selectedLocation.direccion}
                     </p>
-                    <p className="text-xs text-emerald-600">
+                    <p className="text-xs text-red-700">
                       {selectedLocation.ciudad}, {selectedLocation.municipio}
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100"
+                    className="h-6 w-6 p-0 text-red-800 hover:text-red-950 hover:bg-red-100"
                     onClick={() => setSelectedLocation(null)}
                   >
                     <X className="h-4 w-4" />
@@ -124,7 +124,7 @@ export default function MapPage() {
                       <Badge
                         key={wt.id}
                         variant="secondary"
-                        className="text-xs bg-emerald-100 text-emerald-800"
+                        className="text-xs bg-red-100 text-red-900"
                       >
                         {wt.nombre}
                       </Badge>
@@ -134,7 +134,7 @@ export default function MapPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full mt-3 text-xs border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+                  className="w-full mt-3 text-xs border-red-300 text-red-800 hover:bg-red-100"
                   asChild
                 >
                   <Link href={`/locations/${selectedLocation.id}`}>

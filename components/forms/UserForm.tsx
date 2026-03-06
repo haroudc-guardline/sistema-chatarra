@@ -166,7 +166,7 @@ export function UserForm({ mode, initialData, onSubmit, isSubmitting }: UserForm
                     </div>
                     <FormMessage />
                     {generatedPassword && (
-                      <p className="text-xs text-emerald-600">
+                      <p className="text-xs text-red-700">
                         Guarda esta contraseña, se mostrará solo una vez
                       </p>
                     )}
@@ -212,7 +212,7 @@ export function UserForm({ mode, initialData, onSubmit, isSubmitting }: UserForm
           </Button>
           <Button
             type="submit"
-            className="bg-emerald-500 hover:bg-emerald-600"
+            className="bg-red-600 hover:bg-red-700"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

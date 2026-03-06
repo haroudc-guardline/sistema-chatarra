@@ -543,7 +543,7 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
           </Button>
           <Button
             type="submit"
-            className="bg-emerald-500 hover:bg-emerald-600"
+            className="bg-red-600 hover:bg-red-700"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

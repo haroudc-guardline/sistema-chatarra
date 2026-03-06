@@ -181,7 +181,7 @@ export default function LocationsPage() {
         <div className="flex gap-2">
           {isOperador && (
             <Link href="/locations/new">
-              <Button className="bg-emerald-500 hover:bg-emerald-600">
+              <Button className="bg-red-600 hover:bg-red-700">
                 <Plus className="mr-2 h-4 w-4" />
                 Nueva Ubicación
               </Button>

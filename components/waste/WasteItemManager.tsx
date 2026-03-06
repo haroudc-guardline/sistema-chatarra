@@ -100,7 +100,7 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
         {/* Summary Stats */}
         <div className="grid grid-cols-3 gap-4 p-4 bg-slate-50 rounded-lg">
           <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-emerald-500" />
+            <Package className="h-4 w-4 text-red-600" />
             <div>
               <p className="text-xs text-slate-500">Volumen Total</p>
               <p className="font-semibold">{totalVolume.toFixed(2)} m³</p>
@@ -137,7 +137,7 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
                 className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50"
               >
                 <div className="flex items-center gap-3">
-                  <Badge className="bg-emerald-100 text-emerald-700">
+                  <Badge className="bg-red-100 text-red-800">
                     {item.waste_type?.nombre || 'Desconocido'}
                   </Badge>
                   <div className="flex items-center gap-1 text-sm text-slate-600">

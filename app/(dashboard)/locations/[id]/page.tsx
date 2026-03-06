@@ -184,7 +184,7 @@ export default function LocationDetailPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-emerald-500" />
+                  <Package className="h-4 w-4 text-red-600" />
                   <div>
                     <p className="text-sm text-slate-500">Volumen</p>
                     <p className="font-medium">{location.volumen} m³</p>

@@ -258,13 +258,13 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
           {...getRootProps()}
           className={`
             border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors
-            ${isDragActive ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'}
+            ${isDragActive ? 'border-red-600 bg-red-50' : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'}
           `}
         >
           <input {...getInputProps()} />
           <FileSpreadsheet className="h-12 w-12 text-slate-400 mx-auto mb-4" />
           {isDragActive ? (
-            <p className="text-emerald-600 font-medium">Suelta el archivo aquí...</p>
+            <p className="text-red-700 font-medium">Suelta el archivo aquí...</p>
           ) : (
             <>
               <p className="text-slate-600 font-medium">
@@ -284,7 +284,7 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-3">
-                <FileSpreadsheet className="h-8 w-8 text-emerald-500" />
+                <FileSpreadsheet className="h-8 w-8 text-red-600" />
                 <div>
                   <CardTitle className="text-base">{file.name}</CardTitle>
                   <p className="text-sm text-slate-500">
@@ -424,7 +424,7 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
                 type="button"
                 onClick={handleImport}
                 disabled={isImporting || isValidating}
-                className="bg-emerald-500 hover:bg-emerald-600"
+                className="bg-red-600 hover:bg-red-700"
               >
                 {isImporting ? (
                   <>
@@ -445,7 +445,7 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
 
       {/* Import Result */}
       {importResult && (
-        <Card className={importResult.errors > 0 ? 'border-yellow-500' : 'border-emerald-500'}>
+        <Card className={importResult.errors > 0 ? 'border-yellow-500' : 'border-red-600'}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               {importResult.errors > 0 ? (
@@ -455,7 +455,7 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-5 w-5 text-emerald-500" />
+                  <CheckCircle className="h-5 w-5 text-red-600" />
                   Importación Exitosa
                 </>
               )}
@@ -463,11 +463,11 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-emerald-50 rounded-lg">
-                <p className="text-3xl font-bold text-emerald-600">
+              <div className="text-center p-4 bg-red-50 rounded-lg">
+                <p className="text-3xl font-bold text-red-700">
                   {importResult.success}
                 </p>
-                <p className="text-sm text-emerald-700">Registros importados</p>
+                <p className="text-sm text-red-800">Registros importados</p>
               </div>
               <div className="text-center p-4 bg-red-50 rounded-lg">
                 <p className="text-3xl font-bold text-red-600">

@@ -69,8 +69,8 @@ export default function ForgotPasswordPage() {
       <Card className="w-full shadow-lg">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center">
-              <CheckCircle className="h-7 w-7 text-emerald-600" />
+            <div className="h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-7 w-7 text-red-700" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-slate-900">
@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
         <CardFooter className="flex justify-center">
           <Link
             href="/login"
-            className="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 hover:underline"
+            className="flex items-center gap-2 text-sm text-red-700 hover:text-red-800 hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio de sesión
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
     <Card className="w-full shadow-lg">
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-4">
-          <div className="h-12 w-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+          <div className="h-12 w-12 bg-red-600 rounded-xl flex items-center justify-center">
             <Trash2 className="h-7 w-7 text-white" />
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function ForgotPasswordPage() {
 
             <Button
               type="submit"
-              className="w-full bg-emerald-500 hover:bg-emerald-600"
+              className="w-full bg-red-600 hover:bg-red-700"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -161,7 +161,7 @@ export default function ForgotPasswordPage() {
       <CardFooter className="flex justify-center">
         <Link
           href="/login"
-          className="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 hover:underline"
+          className="flex items-center gap-2 text-sm text-red-700 hover:text-red-800 hover:underline"
         >
           <ArrowLeft className="h-4 w-4" />
           Volver al inicio de sesión

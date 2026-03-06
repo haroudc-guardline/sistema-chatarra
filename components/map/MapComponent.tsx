@@ -88,7 +88,7 @@ export function MapComponent({
     return (
       <div className="h-full flex items-center justify-center bg-slate-100 rounded-lg">
         <div className="text-center p-6">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 mx-auto" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto" />
           <p className="text-slate-500 mt-2">Cargando mapa...</p>
         </div>
       </div>
@@ -150,7 +150,7 @@ export function MapComponent({
                         {location.waste_types.slice(0, 3).map((wt) => (
                           <span
                             key={wt.id}
-                            className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded"
+                            className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded"
                           >
                             {wt.nombre}
                           </span>
@@ -165,7 +165,7 @@ export function MapComponent({
                   )}
                   <a
                     href={`/locations/${location.id}`}
-                    className="text-emerald-600 text-sm hover:underline mt-2 inline-block"
+                    className="text-red-700 text-sm hover:underline mt-2 inline-block"
                   >
                     Ver detalles →
                   </a>
