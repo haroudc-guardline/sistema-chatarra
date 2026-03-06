@@ -84,7 +84,7 @@ export interface WasteItem {
   volume: number
   weight: number
   value: number
-  quality: string
+  quality?: string | null
   created_at: string
   waste_type?: WasteType
 }
