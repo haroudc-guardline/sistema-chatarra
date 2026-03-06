@@ -333,16 +333,16 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
                 <div className="space-y-2">
                   <Label htmlFor="quality">Calidad</Label>
                   <Select
-                    value={newItem.quality}
+                    value={newItem.quality || "no-calidad"}
                     onValueChange={(value) =>
-                      setNewItem({ ...newItem, quality: value })
+                      setNewItem({ ...newItem, quality: value === "no-calidad" ? "" : value })
                     }
                   >
                     <SelectTrigger id="quality">
                       <SelectValue placeholder="Selecciona calidad" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sin especificar</SelectItem>
+                      <SelectItem value="no-calidad">Sin especificar (opcional)</SelectItem>
                       {QUALITY_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           <div className="flex items-center gap-2">
