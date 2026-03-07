@@ -25,7 +25,7 @@ export async function GET(
 
   const { data: wasteItems, error } = await supabase
     .from('waste_items')
-    .select('*, waste_types(*)')
+    .select('*, waste_types!waste_type_id(*)')
     .eq('location_id', id)
     .order('created_at', { ascending: false })
 
@@ -34,7 +34,14 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json(wasteItems)
+  // Transform the data to match the expected format (waste_type singular)
+  const transformedItems = wasteItems?.map(item => ({
+    ...item,
+    waste_type: item.waste_types?.[0] || item.waste_types || null,
+    waste_types: undefined // Remove the plural form
+  })) || []
+
+  return NextResponse.json(transformedItems)
 }
 
 export async function POST(
@@ -108,7 +115,7 @@ export async function POST(
     const { data: newWasteItem, error } = await supabase
       .from('waste_items')
       .insert(insertData)
-      .select('*, waste_types(*)')
+      .select('*, waste_types!waste_type_id(*)')
       .single()
 
     if (error) {
@@ -119,7 +126,14 @@ export async function POST(
       )
     }
 
-    return NextResponse.json(newWasteItem, { status: 201 })
+    // Transform the data to match the expected format (waste_type singular)
+    const transformedItem = {
+      ...newWasteItem,
+      waste_type: newWasteItem.waste_types?.[0] || newWasteItem.waste_types || null,
+      waste_types: undefined // Remove the plural form
+    }
+
+    return NextResponse.json(transformedItem, { status: 201 })
   } catch (error: any) {
     console.error('Unexpected error:', error)
     return NextResponse.json(
