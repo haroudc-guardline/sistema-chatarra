@@ -41,7 +41,7 @@ export default function LocationDetailPage() {
   const { isOperador, isAdmin } = useAuth()
   const locationId = parseInt(params.id as string)
   const { location, isLoading } = useLocation(locationId)
-  const { deleteLocation, isDeleting } = useLocations() // <-- Añadido
+  const { deleteLocation, isDeleting, wasteTypes } = useLocations()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
   const [auditLoading, setAuditLoading] = useState(true)
@@ -244,7 +244,7 @@ export default function LocationDetailPage() {
 
           <WasteItemManager 
             locationId={location.id} 
-            wasteTypes={location.waste_types || []} 
+            wasteTypes={wasteTypes || []} 
           />
 
           {location.documents && location.documents.length > 0 && (
