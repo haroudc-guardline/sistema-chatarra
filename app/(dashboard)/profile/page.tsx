@@ -189,20 +189,22 @@ export default function ProfilePage() {
         )}
 
         {/* Avatar hero card */}
-        <Card className="bg-white/70 backdrop-blur-md shadow-xl border border-slate-200/50 rounded-2xl overflow-hidden">
-          <div className="h-24 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800" />
-          <CardContent className="px-6 pb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10">
-              <Avatar className="h-20 w-20 ring-4 ring-white shadow-lg shrink-0">
+        <Card className="bg-white/70 backdrop-blur-md shadow-xl border border-slate-200/50 rounded-2xl">
+          <div className="h-24 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 rounded-t-2xl" />
+          <CardContent className="px-6 pb-6 pt-0">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+              {/* Avatar overlaps the banner independently */}
+              <Avatar className="-mt-10 h-20 w-20 ring-4 ring-white shadow-lg shrink-0 z-10">
                 <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-800 text-white text-2xl font-bold">
                   {user?.nombre ? getInitials(user.nombre) : 'U'}
                 </AvatarFallback>
               </Avatar>
-              <div className="pb-1 space-y-1">
-                <h2 className="text-xl font-bold text-slate-900">{user?.nombre || 'Usuario'}</h2>
+              {/* Text sits at card level, aligned to bottom of avatar on desktop */}
+              <div className="pb-1 space-y-1 min-w-0">
+                <h2 className="text-xl font-bold text-slate-900 truncate">{user?.nombre || 'Usuario'}</h2>
                 <p className="text-slate-500 text-sm flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5" />
-                  {user?.email}
+                  <Mail className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{user?.email}</span>
                 </p>
                 <div className="pt-1">{getRoleBadge(user?.rol)}</div>
               </div>

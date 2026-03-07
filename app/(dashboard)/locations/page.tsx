@@ -171,10 +171,12 @@ export default function LocationsPage() {
       <LocationsBreadcrumbs />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Ubicaciones</h1>
-          <p className="text-slate-500 mt-1">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="space-y-0.5">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
+            Ubicaciones
+          </h1>
+          <p className="text-slate-500 text-sm">
             Gestiona las instituciones con residuos registradas
           </p>
         </div>
