@@ -52,6 +52,16 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
     deleteWasteItem,
   } = useWasteItems(locationId)
 
+  // Helper: resolve waste type name from join OR from local wasteTypes list as fallback
+  const getWasteTypeName = (item: { waste_type?: { nombre?: string } | null; waste_type_id?: number }): string => {
+    if (item.waste_type?.nombre) return item.waste_type.nombre
+    if (item.waste_type_id) {
+      const found = wasteTypes.find(wt => wt.id === item.waste_type_id)
+      if (found) return found.nombre
+    }
+    return 'Sin tipo'
+  }
+
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [newItem, setNewItem] = useState({
@@ -199,7 +209,7 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
               >
                 <div className="flex items-center gap-4 flex-wrap">
                   <Badge className="bg-red-100 text-red-800 font-medium px-3 py-1">
-                    {item.waste_type?.nombre || 'Desconocido'}
+                    {getWasteTypeName(item)}
                   </Badge>
                   
                   <div className="flex items-center gap-1.5 text-sm text-slate-600">
