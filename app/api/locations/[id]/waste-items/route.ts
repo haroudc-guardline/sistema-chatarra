@@ -35,11 +35,17 @@ export async function GET(
   }
 
   // Transform the data to match the expected format (waste_type singular)
-  const transformedItems = wasteItems?.map(item => ({
-    ...item,
-    waste_type: item.waste_types?.[0] || item.waste_types || null,
-    waste_types: undefined // Remove the plural form
-  })) || []
+  const transformedItems = wasteItems?.map(item => {
+    // Supabase returns the related data as an object directly, not as an array
+    const wasteTypeData = item.waste_types
+    return {
+      ...item,
+      waste_type: wasteTypeData && typeof wasteTypeData === 'object' && !Array.isArray(wasteTypeData) 
+        ? wasteTypeData 
+        : null,
+      waste_types: undefined // Remove the plural form
+    }
+  }) || []
 
   return NextResponse.json(transformedItems)
 }
@@ -127,9 +133,12 @@ export async function POST(
     }
 
     // Transform the data to match the expected format (waste_type singular)
+    const wasteTypeData = newWasteItem.waste_types
     const transformedItem = {
       ...newWasteItem,
-      waste_type: newWasteItem.waste_types?.[0] || newWasteItem.waste_types || null,
+      waste_type: wasteTypeData && typeof wasteTypeData === 'object' && !Array.isArray(wasteTypeData)
+        ? wasteTypeData
+        : null,
       waste_types: undefined // Remove the plural form
     }
 
