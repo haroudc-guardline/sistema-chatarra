@@ -19,6 +19,10 @@ interface MapComponentProps {
   selectedLocation?: LocationWithDetails | null
   onMarkerClick?: (location: LocationWithDetails) => void
   onMapClick?: (e: google.maps.MapMouseEvent) => void
+  /** Called when the single location marker is dragged to a new position */
+  onMarkerDragEnd?: (lat: number, lng: number) => void
+  /** Makes the first marker draggable (use in forms for position fine-tuning) */
+  draggableMarker?: boolean
   interactive?: boolean
   height?: string
 }
@@ -28,6 +32,8 @@ export function MapComponent({
   selectedLocation,
   onMarkerClick,
   onMapClick,
+  onMarkerDragEnd,
+  draggableMarker = false,
   interactive = true,
   height = '100%',
 }: MapComponentProps) {
@@ -71,6 +77,12 @@ export function MapComponent({
     onMarkerClick?.(location)
   }
 
+  const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
+    if (e.latLng && onMarkerDragEnd) {
+      onMarkerDragEnd(e.latLng.lat(), e.latLng.lng())
+    }
+  }
+
   if (loadError) {
     return (
       <div className="h-full flex items-center justify-center bg-slate-100 rounded-lg">
@@ -112,7 +124,7 @@ export function MapComponent({
           clickableIcons: interactive,
         }}
       >
-        {locations.map((location) => (
+        {locations.map((location, index) => (
           <Marker
             key={location.id}
             position={{
@@ -120,8 +132,13 @@ export function MapComponent({
               lng: location.longitud,
             }}
             onClick={() => handleMarkerClick(location)}
+            draggable={draggableMarker && index === 0}
+            onDragEnd={draggableMarker && index === 0 ? handleMarkerDragEnd : undefined}
+            cursor={draggableMarker && index === 0 ? 'grab' : undefined}
             icon={{
-              url: activeMarker === location.id
+              url: draggableMarker && index === 0
+                ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                : activeMarker === location.id
                 ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
                 : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
             }}

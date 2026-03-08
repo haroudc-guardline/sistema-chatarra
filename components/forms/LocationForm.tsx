@@ -521,12 +521,12 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
                     />
                   </div>
 
-                  <div className="h-[250px] rounded-lg overflow-hidden border">
+                  <div className="h-[280px] rounded-lg overflow-hidden border border-slate-200">
                     <MapComponent
                       locations={selectedPosition ? [{
                         id: 0,
                         nombre_institucion: 'Ubicación seleccionada',
-                        direccion: '',
+                        direccion: form.getValues('direccion') || '',
                         latitud: selectedPosition.lat,
                         longitud: selectedPosition.lng,
                         ciudad: '',
@@ -539,11 +539,18 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
                         created_at: '',
                       } as LocationWithDetails] : []}
                       onMapClick={handleMapClick}
+                      draggableMarker={!!selectedPosition}
+                      onMarkerDragEnd={(lat, lng) => {
+                        form.setValue('latitud', lat)
+                        form.setValue('longitud', lng)
+                        setSelectedPosition({ lat, lng })
+                      }}
                       height="100%"
                     />
                   </div>
-                  <p className="text-xs text-slate-500">
-                    Haz clic en el mapa para seleccionar la ubicación exacta
+                  <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    Haz clic en el mapa para posicionar, o <strong>arrastra el marcador azul</strong> para ajustar con precisión
                   </p>
                 </div>
               </CardContent>

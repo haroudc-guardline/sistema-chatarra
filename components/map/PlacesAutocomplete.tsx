@@ -40,12 +40,13 @@ export function PlacesAutocomplete({
 
     try {
       // Initialize Google Places Autocomplete
+      // types: ['geocode', 'establishment'] allows both addresses and named places/businesses
       autocompleteRef.current = new window.google.maps.places.Autocomplete(
         inputRef.current,
         {
-          types: ['address'], // Only addresses, not businesses
+          types: ['geocode', 'establishment'],
           componentRestrictions: { country: 'pa' }, // Restrict to Panama
-          fields: ['formatted_address', 'geometry', 'name'],
+          fields: ['formatted_address', 'geometry', 'name', 'place_id'],
         }
       )
 
