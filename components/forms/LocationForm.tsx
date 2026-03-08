@@ -64,6 +64,7 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
   const router = useRouter()
   const { wasteTypes, cities, createWasteType } = useLocations()
   const [municipios, setMunicipios] = useState<string[]>([])
+  const [isLoadingMunicipios, setIsLoadingMunicipios] = useState(false)
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [geocodeError, setGeocodeError] = useState<string | null>(null)
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(
@@ -91,18 +92,39 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
     },
   })
 
+  // Watch ciudad at component level so useEffect reacts properly
+  const watchedCiudad = form.watch('ciudad')
+
   // Load municipalities when city changes
   useEffect(() => {
-    const ciudad = form.watch('ciudad')
-    if (ciudad) {
-      const loadMunicipios = async () => {
-        const { locationService } = await import('@/lib/services/location-service')
-        const data = await locationService.getMunicipios(ciudad)
-        setMunicipios(data)
-      }
-      loadMunicipios()
+    if (!watchedCiudad) {
+      setMunicipios([])
+      return
     }
-  }, [form.watch('ciudad')])
+    setIsLoadingMunicipios(true)
+    // Reset municipio when city changes (unless editing an existing location in same city)
+    const currentMunicipio = form.getValues('municipio')
+    if (!initialData || initialData.ciudad !== watchedCiudad) {
+      form.setValue('municipio', '')
+    }
+    const load = async () => {
+      try {
+        const { locationService } = await import('@/lib/services/location-service')
+        const data = await locationService.getMunicipios(watchedCiudad)
+        setMunicipios(data)
+        // If editing and the stored municipio is in the list, keep it
+        if (initialData && initialData.ciudad === watchedCiudad && currentMunicipio) {
+          form.setValue('municipio', currentMunicipio)
+        }
+      } catch (e) {
+        console.error('Error loading municipios:', e)
+        setMunicipios([])
+      } finally {
+        setIsLoadingMunicipios(false)
+      }
+    }
+    load()
+  }, [watchedCiudad])
 
   const handleGeocode = async () => {
     const direccion = form.getValues('direccion')
@@ -222,14 +244,14 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
                     name="ciudad"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Ciudad *</FormLabel>
+                        <FormLabel>Provincia / Ciudad *</FormLabel>
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar" />
+                              <SelectValue placeholder="Seleccionar provincia" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -254,11 +276,19 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
                         <Select
                           value={field.value}
                           onValueChange={field.onChange}
-                          disabled={!form.watch('ciudad')}
+                          disabled={!watchedCiudad || isLoadingMunicipios}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar" />
+                              <SelectValue
+                                placeholder={
+                                  !watchedCiudad
+                                    ? 'Selecciona una ciudad primero'
+                                    : isLoadingMunicipios
+                                    ? 'Cargando...'
+                                    : 'Seleccionar municipio'
+                                }
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -269,6 +299,11 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
                             ))}
                           </SelectContent>
                         </Select>
+                        {watchedCiudad && !isLoadingMunicipios && municipios.length === 0 && (
+                          <p className="text-xs text-amber-600 mt-1">
+                            No se encontraron municipios para esta ciudad.
+                          </p>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}

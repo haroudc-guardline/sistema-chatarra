@@ -120,32 +120,44 @@ export const locationService = {
     return data as WasteType[]
   },
 
-  // Get unique cities for filter dropdown
+  // Get all provinces from panama_geography table
   async getCities() {
     const { data, error } = await supabase
-      .from('locations')
-      .select('ciudad')
-      .order('ciudad')
+      .from('panama_geography')
+      .select('provincia')
+      .order('provincia')
 
-    if (error) throw error
-    return [...new Set(data?.map(d => d.ciudad) || [])] as string[]
+    if (error) {
+      // Fallback to locations table if geography table doesn't exist yet
+      const fallback = await supabase.from('locations').select('ciudad').order('ciudad')
+      if (fallback.error) throw fallback.error
+      return [...new Set(fallback.data?.map(d => d.ciudad) || [])] as string[]
+    }
+    return [...new Set(data?.map(d => d.provincia) || [])] as string[]
   },
 
-  // Get unique municipalities for filter dropdown
+  // Get districts (municipios) filtered by province from panama_geography table
   async getMunicipios(ciudad?: string) {
     let query = supabase
-      .from('locations')
-      .select('municipio')
-      .order('municipio')
+      .from('panama_geography')
+      .select('distrito')
+      .order('distrito')
 
     if (ciudad) {
-      query = query.eq('ciudad', ciudad)
+      query = query.eq('provincia', ciudad)
     }
 
     const { data, error } = await query
 
-    if (error) throw error
-    return [...new Set(data?.map(d => d.municipio) || [])] as string[]
+    if (error) {
+      // Fallback to locations table if geography table doesn't exist yet
+      let fallback = supabase.from('locations').select('municipio').order('municipio')
+      if (ciudad) fallback = fallback.eq('ciudad', ciudad)
+      const fallbackResult = await fallback
+      if (fallbackResult.error) throw fallbackResult.error
+      return [...new Set(fallbackResult.data?.map(d => d.municipio) || [])] as string[]
+    }
+    return [...new Set(data?.map(d => d.distrito) || [])] as string[]
   },
 
   // FB-005: Create new waste type
