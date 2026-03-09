@@ -19,40 +19,56 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Profile | null>(null)
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null)
   // sessionExists: true = session confirmed, false = no session, null = still resolving
   const [sessionExists, setSessionExists] = useState<boolean | null>(null)
+  const [profileLoaded, setProfileLoaded] = useState(false)
 
+  // Effect 1: Listen to auth state changes (sync only — no DB calls here)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!session?.user) {
-          // No session — resolve immediately, no DB call needed
+      (_event, session) => {
+        if (session?.user) {
+          setSessionUserId(session.user.id)
+          setSessionExists(true)
+        } else {
+          setSessionUserId(null)
           setUser(null)
           setSessionExists(false)
-          return
-        }
-
-        // Session exists → fetch profile before unblocking render
-        // This prevents the flash of "Usuario / Viewer" while profile loads
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-
-          setUser(profile)
-        } catch (error) {
-          console.error('Error fetching profile:', error)
-        } finally {
-          // Only unblock render after profile attempt completes (success or failure)
-          setSessionExists(true)
+          setProfileLoaded(false)
         }
       }
     )
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // Effect 2: Fetch profile when we have a userId (separate from auth callback)
+  useEffect(() => {
+    if (!sessionUserId) {
+      setProfileLoaded(false)
+      return
+    }
+
+    let cancelled = false
+
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', sessionUserId)
+      .single()
+      .then(({ data: profile, error }) => {
+        if (cancelled) return
+        if (error) {
+          console.error('Error fetching profile:', error)
+        } else {
+          setUser(profile)
+        }
+        setProfileLoaded(true)
+      })
+
+    return () => { cancelled = true }
+  }, [sessionUserId])
 
   const login = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -67,7 +83,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     setUser(null)
+    setSessionUserId(null)
     setSessionExists(false)
+    setProfileLoaded(false)
   }
 
   const hasRole = (roles: UserRole[]) => {
@@ -75,11 +93,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return roles.includes(user.rol)
   }
 
+  // isLoading: auth unknown OR session exists but profile not yet fetched
+  const isLoading = sessionExists === null || (sessionExists === true && !profileLoaded)
+
   const value: AuthContextType = {
     user,
-    // isLoading only while auth state is unknown (before INITIAL_SESSION fires)
-    isLoading: sessionExists === null,
-    // isAuthenticated as soon as session is confirmed — doesn't wait for profile fetch
+    isLoading,
     isAuthenticated: sessionExists === true,
     login,
     logout,
