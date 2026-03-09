@@ -100,3 +100,57 @@ export interface MarketPrice {
   notes?: string
   waste_type?: WasteType
 }
+
+export type SaleListingStatus = 'draft' | 'active' | 'closed'
+export type SaleInquiryStatus = 'sent' | 'opened' | 'responded'
+
+export interface SaleListing {
+  id: number
+  created_by?: string
+  location_id: number
+  title: string
+  status: SaleListingStatus
+  notes?: string
+  contact_name?: string
+  contact_email?: string
+  contact_phone?: string
+  total_market_value: number
+  total_suggested_price: number
+  expires_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface SaleListingItem {
+  id: number
+  sale_listing_id: number
+  waste_item_id?: number
+  waste_type_id?: number
+  weight_kg: number
+  volume_m3: number
+  quality?: string
+  market_price_per_kg: number
+  market_price_per_m3: number
+  suggested_price: number
+  custom_price?: number
+  created_at: string
+  waste_type?: WasteType
+}
+
+export interface SaleInquiry {
+  id: number
+  sale_listing_id: number
+  buyer_name: string
+  buyer_email: string
+  buyer_phone?: string
+  message?: string
+  status: SaleInquiryStatus
+  sent_at: string
+  created_at: string
+}
+
+export interface SaleListingWithDetails extends SaleListing {
+  location?: Location
+  items?: SaleListingItem[]
+  inquiries?: SaleInquiry[]
+}

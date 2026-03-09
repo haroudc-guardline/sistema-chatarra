@@ -26,6 +26,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Leaf,
+  ShoppingCart,
 } from 'lucide-react'
 
 interface NavItem {
@@ -67,6 +68,11 @@ const navItems: NavItem[] = [
     href: '/import',
     label: 'Importar',
     icon: <Upload className="h-5 w-5" />,
+  },
+  {
+    href: '/sales',
+    label: 'Ventas',
+    icon: <ShoppingCart className="h-5 w-5" />,
   },
 ]
 
