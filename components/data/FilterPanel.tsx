@@ -40,6 +40,11 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
   const { cities, wasteTypes } = useLocations()
   const [municipios, setMunicipios] = useState<string[]>([])
 
+  // Keep localFilters in sync when parent resets or changes filters externally
+  useEffect(() => {
+    setLocalFilters(filters)
+  }, [filters])
+
   // Load municipalities when city changes
   useEffect(() => {
     const loadMunicipios = async () => {

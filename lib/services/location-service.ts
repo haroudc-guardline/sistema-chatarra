@@ -31,20 +31,29 @@ export const locationService = {
       query = query.ilike('nombre_institucion', `%${filters.search}%`)
     }
 
-    // Filter by waste types: fetch the location_ids that have ANY of the selected types,
-    // then restrict the main query to those IDs.
+    // Filter by waste types: check BOTH location_waste_types (explicit associations)
+    // AND waste_items (actual inventory entries) so the filter works even when
+    // location_waste_types hasn't been populated yet for a location.
     if (filters?.wasteTypeIds && filters.wasteTypeIds.length > 0) {
-      const { data: lwt, error: lwtError } = await supabase
-        .from('location_waste_types')
-        .select('location_id')
-        .in('waste_type_id', filters.wasteTypeIds)
+      const [lwtResult, wiResult] = await Promise.all([
+        supabase
+          .from('location_waste_types')
+          .select('location_id')
+          .in('waste_type_id', filters.wasteTypeIds),
+        supabase
+          .from('waste_items')
+          .select('location_id')
+          .in('waste_type_id', filters.wasteTypeIds),
+      ])
 
-      if (lwtError) throw lwtError
+      if (lwtResult.error) throw lwtResult.error
+      if (wiResult.error) throw wiResult.error
 
-      const matchingIds = [...new Set((lwt ?? []).map((r) => r.location_id))]
+      const fromLwt = (lwtResult.data ?? []).map((r) => r.location_id)
+      const fromWi = (wiResult.data ?? []).map((r) => r.location_id)
+      const matchingIds = [...new Set([...fromLwt, ...fromWi])]
 
       if (matchingIds.length === 0) {
-        // No locations have the selected waste types → return empty list immediately
         return [] as LocationWithDetails[]
       }
 

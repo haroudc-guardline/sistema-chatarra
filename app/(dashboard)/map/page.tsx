@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Filter, X, MapPin } from 'lucide-react'
+import { Filter, X, MapPin, SlidersHorizontal } from 'lucide-react'
 import type { LocationWithDetails } from '@/types/database'
 import Link from 'next/link'
 
@@ -175,6 +175,21 @@ export default function MapPage() {
           onMarkerClick={setSelectedLocation}
           height="100%"
         />
+
+        {/* Empty state overlay when filters return no results */}
+        {!isLoading && (locations?.length === 0) && Object.values(filters).some(Boolean) && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 text-center max-w-sm mx-4 pointer-events-auto">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-slate-100 mx-auto mb-4">
+                <SlidersHorizontal className="h-8 w-8 text-slate-400" />
+              </div>
+              <p className="text-slate-800 font-semibold text-lg">Sin resultados</p>
+              <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+                Ninguna ubicación coincide con los filtros aplicados. Prueba ajustando los criterios de búsqueda.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
