@@ -28,6 +28,8 @@ export function useLocations(filters?: LocationFilters) {
   const { data: cities } = useQuery({
     queryKey: ['cities'],
     queryFn: () => locationService.getCities(),
+    staleTime: 24 * 60 * 60 * 1000, // 24h — geography data rarely changes
+    gcTime: 24 * 60 * 60 * 1000,
   })
 
   const createMutation = useMutation({

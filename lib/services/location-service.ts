@@ -120,44 +120,45 @@ export const locationService = {
     return data as WasteType[]
   },
 
-  // Get all provinces from panama_geography table
+  // Get all provinces via cached API endpoint (24h CDN cache)
   async getCities() {
-    const { data, error } = await supabase
-      .from('panama_geography')
-      .select('provincia')
-      .order('provincia')
-
-    if (error) {
-      // Fallback to locations table if geography table doesn't exist yet
-      const fallback = await supabase.from('locations').select('ciudad').order('ciudad')
-      if (fallback.error) throw fallback.error
-      return [...new Set(fallback.data?.map(d => d.ciudad) || [])] as string[]
+    try {
+      const res = await fetch('/api/geography?type=provincias', { cache: 'force-cache' })
+      if (!res.ok) throw new Error('Failed to fetch provinces')
+      const { provincias } = await res.json()
+      return provincias as string[]
+    } catch {
+      // Fallback: query directly
+      const { data, error } = await supabase
+        .from('panama_geography')
+        .select('provincia')
+        .order('provincia')
+      if (error) throw error
+      return [...new Set(data?.map((d) => d.provincia) ?? [])] as string[]
     }
-    return [...new Set(data?.map(d => d.provincia) || [])] as string[]
   },
 
-  // Get districts (municipios) filtered by province from panama_geography table
+  // Get districts (municipios) for a province via cached API endpoint
   async getMunicipios(ciudad?: string) {
-    let query = supabase
-      .from('panama_geography')
-      .select('distrito')
-      .order('distrito')
-
-    if (ciudad) {
-      query = query.eq('provincia', ciudad)
+    if (!ciudad) return [] as string[]
+    try {
+      const res = await fetch(
+        `/api/geography?type=distritos&provincia=${encodeURIComponent(ciudad)}`,
+        { cache: 'force-cache' }
+      )
+      if (!res.ok) throw new Error('Failed to fetch districts')
+      const { distritos } = await res.json()
+      return distritos as string[]
+    } catch {
+      // Fallback: query directly
+      const { data, error } = await supabase
+        .from('panama_geography')
+        .select('distrito')
+        .eq('provincia', ciudad)
+        .order('distrito')
+      if (error) throw error
+      return [...new Set(data?.map((d) => d.distrito) ?? [])] as string[]
     }
-
-    const { data, error } = await query
-
-    if (error) {
-      // Fallback to locations table if geography table doesn't exist yet
-      let fallback = supabase.from('locations').select('municipio').order('municipio')
-      if (ciudad) fallback = fallback.eq('ciudad', ciudad)
-      const fallbackResult = await fallback
-      if (fallbackResult.error) throw fallbackResult.error
-      return [...new Set(fallbackResult.data?.map(d => d.municipio) || [])] as string[]
-    }
-    return [...new Set(data?.map(d => d.distrito) || [])] as string[]
   },
 
   // FB-005: Create new waste type

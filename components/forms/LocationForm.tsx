@@ -33,6 +33,7 @@ import { FileUpload } from './FileUpload'
 import { CreatableWasteTypeSelect } from '@/components/waste/CreatableWasteTypeSelect'
 import { Loader2, MapPin, Search } from 'lucide-react'
 import type { Location, LocationWithDetails } from '@/types/database'
+import { locationService } from '@/lib/services/location-service'
 
 const locationSchema = z.object({
   nombre_institucion: z.string().min(1, 'El nombre es requerido'),
@@ -109,7 +110,6 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
     }
     const load = async () => {
       try {
-        const { locationService } = await import('@/lib/services/location-service')
         const data = await locationService.getMunicipios(watchedCiudad)
         setMunicipios(data)
         // If editing and the stored municipio is in the list, keep it
