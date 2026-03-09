@@ -14,6 +14,7 @@ interface StatCardProps {
   color?: 'blue' | 'emerald' | 'amber' | 'rose' | 'violet' | 'slate'
   className?: string
   onClick?: () => void
+  isLoading?: boolean
 }
 
 const colorVariants = {
@@ -70,6 +71,7 @@ export function StatCard({
   color = 'slate',
   className,
   onClick,
+  isLoading = false,
 }: StatCardProps) {
   const colors = colorVariants[color]
 
@@ -87,13 +89,13 @@ export function StatCard({
         "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500",
         colors.gradient
       )} />
-      
+
       {/* Top accent line */}
       <div className={cn(
         "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r opacity-60",
         colors.bg
       )} />
-      
+
       <CardContent className="p-6 relative z-10">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
@@ -101,10 +103,14 @@ export function StatCard({
               {title}
             </p>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                {value}
-              </span>
-              {trend && (
+              {isLoading ? (
+                <div className="h-8 w-24 bg-slate-200 rounded-lg animate-pulse" />
+              ) : (
+                <span className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                  {value}
+                </span>
+              )}
+              {!isLoading && trend && (
                 <span className={cn(
                   "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
                   colors.trend
@@ -118,7 +124,9 @@ export function StatCard({
                 </span>
               )}
             </div>
-            {description && (
+            {isLoading ? (
+              <div className="h-4 w-32 bg-slate-100 rounded mt-2 animate-pulse" />
+            ) : description && (
               <p className="text-sm text-slate-500 mt-2 leading-relaxed">
                 {description}
               </p>

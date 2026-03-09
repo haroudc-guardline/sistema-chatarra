@@ -123,9 +123,13 @@ export default function DashboardPage() {
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-600/20">
                 <Leaf className="h-5 w-5 text-white" />
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
-                ¡Bienvenido, {user?.nombre?.split(' ')[0] || 'Usuario'}!
-              </h1>
+              {user ? (
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
+                  ¡Bienvenido, {user.nombre?.split(' ')[0] || 'Usuario'}!
+                </h1>
+              ) : (
+                <div className="h-8 w-56 bg-slate-200 rounded-lg animate-pulse" />
+              )}
             </div>
             <p className="text-slate-600 text-base pl-[52px]">
               Panel de control del Sistema Nacional de Residuos de Panamá
@@ -156,6 +160,7 @@ export default function DashboardPage() {
             description="Registradas en el sistema"
             trend={{ value: 12, isPositive: true }}
             color="blue"
+            isLoading={locationsLoading}
           />
           <StatCard
             title="Volumen Total"
@@ -164,6 +169,7 @@ export default function DashboardPage() {
             description={`≈ ${(totalVolume * 0.001).toFixed(1)} millones de litros`}
             trend={{ value: 8, isPositive: true }}
             color="emerald"
+            isLoading={locationsLoading}
           />
           <StatCard
             title="Peso Estimado"
@@ -172,6 +178,7 @@ export default function DashboardPage() {
             description={`≈ ${(totalWeight / 1000).toFixed(1)} toneladas`}
             trend={{ value: 5, isPositive: true }}
             color="amber"
+            isLoading={locationsLoading}
           />
           <StatCard
             title="Valor Total"
@@ -180,6 +187,7 @@ export default function DashboardPage() {
             description="Costo estimado"
             trend={{ value: 15, isPositive: true }}
             color="rose"
+            isLoading={locationsLoading}
           />
         </div>
 
