@@ -55,26 +55,39 @@ export const locationService = {
 
   // Create new location
   async createLocation(location: Omit<Location, 'id' | 'created_at' | 'updated_at'>) {
+    // contacto_responsable is a legacy column — keep it in sync with telefono_responsable
+    const payload = {
+      ...location,
+      contacto_responsable: location.telefono_responsable ?? location.contacto_responsable ?? '',
+    }
     const { data, error } = await supabase
       .from('locations')
-      .insert(location)
+      .insert(payload)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) throw new Error(error.message)
     return data as Location
   },
 
   // Update location
   async updateLocation(id: number, updates: Partial<Location>) {
+    const payload = {
+      ...updates,
+      ultima_actualizacion: new Date().toISOString(),
+      // Keep legacy column in sync if telefono_responsable is being updated
+      ...(updates.telefono_responsable !== undefined && {
+        contacto_responsable: updates.telefono_responsable ?? '',
+      }),
+    }
     const { data, error } = await supabase
       .from('locations')
-      .update({ ...updates, ultima_actualizacion: new Date().toISOString() })
+      .update(payload)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) throw new Error(error.message)
     return data as Location
   },
 

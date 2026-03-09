@@ -33,7 +33,9 @@ export default function NewLocationPage() {
 
       router.push('/locations')
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error al guardar la ubicación'
+      console.error('Error creating location:', err)
+      const message =
+        err instanceof Error ? err.message : 'Error inesperado al guardar la ubicación'
       setSubmitError(message)
     }
   }
