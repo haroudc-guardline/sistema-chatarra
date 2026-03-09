@@ -19,31 +19,32 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Profile | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // sessionExists: true = session confirmed, false = no session, null = still resolving
+  const [sessionExists, setSessionExists] = useState<boolean | null>(null)
 
   useEffect(() => {
-    // onAuthStateChange fires INITIAL_SESSION on mount with the current session,
-    // TOKEN_REFRESHED on token renewal, SIGNED_IN on login, SIGNED_OUT on logout.
-    // This replaces the separate checkSession() call and handles all cases in one place.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        try {
-          if (session?.user) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single()
+        if (!session?.user) {
+          // No session — resolve immediately, no DB call needed
+          setUser(null)
+          setSessionExists(false)
+          return
+        }
 
-            setUser(profile)
-          } else {
-            setUser(null)
-          }
+        // Session exists → unblock render immediately, load profile in background
+        setSessionExists(true)
+
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single()
+
+          setUser(profile)
         } catch (error) {
           console.error('Error fetching profile:', error)
-          setUser(null)
-        } finally {
-          setIsLoading(false)
         }
       }
     )
@@ -56,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     })
-    
+
     if (error) throw error
   }
 
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     setUser(null)
+    setSessionExists(false)
   }
 
   const hasRole = (roles: UserRole[]) => {
@@ -73,8 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthContextType = {
     user,
-    isLoading,
-    isAuthenticated: !!user,
+    // isLoading only while auth state is unknown (before INITIAL_SESSION fires)
+    isLoading: sessionExists === null,
+    // isAuthenticated as soon as session is confirmed — doesn't wait for profile fetch
+    isAuthenticated: sessionExists === true,
     login,
     logout,
     hasRole,
