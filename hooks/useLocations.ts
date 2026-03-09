@@ -18,11 +18,15 @@ export function useLocations(filters?: LocationFilters) {
   const { data: locations, isLoading, error } = useQuery({
     queryKey: ['locations', filters],
     queryFn: () => locationService.getLocations(filters),
+    staleTime: 60_000, // 1 min — avoid refetch on every F5
+    gcTime: 5 * 60_000,
   })
 
   const { data: wasteTypes } = useQuery({
     queryKey: ['wasteTypes'],
     queryFn: () => locationService.getWasteTypes(),
+    staleTime: 5 * 60_000, // 5 min — waste types rarely change
+    gcTime: 10 * 60_000,
   })
 
   const { data: cities } = useQuery({

@@ -6,7 +6,6 @@ import { useLocations } from '@/hooks/useLocations'
 import { useAudit } from '@/hooks/useAudit'
 import { StatCard } from '@/components/data/StatCard'
 import { DataTable } from '@/components/data/DataTable'
-import { DashboardSkeleton } from '@/components/feedback/Skeletons'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -30,12 +29,7 @@ export default function DashboardPage() {
   const { locations, isLoading: locationsLoading } = useLocations()
   const { auditLogs, isLoading: auditLoading } = useAudit({ limit: 5 })
 
-  // Show skeleton while loading
-  if (locationsLoading) {
-    return <DashboardSkeleton />
-  }
-
-  // Calculate stats
+  // Calculate stats (0 while loading — StatCard handles its own skeleton via isLoading prop)
   const totalLocations = locations?.length || 0
   const totalVolume = locations?.reduce((sum, loc) => sum + (loc.volumen || 0), 0) || 0
   const totalWeight = locations?.reduce((sum, loc) => sum + (loc.peso_estimado || 0), 0) || 0

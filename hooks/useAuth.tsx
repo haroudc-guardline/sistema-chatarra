@@ -22,42 +22,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for existing session on mount
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        
-        if (session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-          
-          setUser(profile)
-        }
-      } catch (error) {
-        console.error('Error checking session:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkSession()
-
-    // Listen for auth state changes
+    // onAuthStateChange fires INITIAL_SESSION on mount with the current session,
+    // TOKEN_REFRESHED on token renewal, SIGNED_IN on login, SIGNED_OUT on logout.
+    // This replaces the separate checkSession() call and handles all cases in one place.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-          
-          setUser(profile)
-        } else if (event === 'SIGNED_OUT') {
+        try {
+          if (session?.user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single()
+
+            setUser(profile)
+          } else {
+            setUser(null)
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error)
           setUser(null)
+        } finally {
+          setIsLoading(false)
         }
       }
     )
