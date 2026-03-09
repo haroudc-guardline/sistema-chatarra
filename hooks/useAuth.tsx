@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         if (!session?.user) {
           // No session — resolve immediately, no DB call needed
           setUser(null)
@@ -32,9 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
 
-        // Session exists → unblock render immediately, load profile in background
-        setSessionExists(true)
-
+        // Session exists → fetch profile before unblocking render
+        // This prevents the flash of "Usuario / Viewer" while profile loads
         try {
           const { data: profile } = await supabase
             .from('profiles')
@@ -45,6 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(profile)
         } catch (error) {
           console.error('Error fetching profile:', error)
+        } finally {
+          // Only unblock render after profile attempt completes (success or failure)
+          setSessionExists(true)
         }
       }
     )
