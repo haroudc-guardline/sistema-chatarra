@@ -1,27 +1,48 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocations } from '@/hooks/useLocations'
 import { LocationForm } from '@/components/forms/LocationForm'
+import { locationService } from '@/lib/services/location-service'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ArrowLeft, AlertCircle } from 'lucide-react'
 import type { Location } from '@/types/database'
 
 export default function NewLocationPage() {
   const router = useRouter()
   const { createLocation, isCreating } = useLocations()
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const handleSubmit = async (data: Omit<Location, 'id' | 'created_at' | 'updated_at'>) => {
-    await createLocation(data)
-    router.push('/locations')
+  const handleSubmit = async (
+    data: Omit<Location, 'id' | 'created_at' | 'updated_at'>,
+    wasteTypeIds: number[]
+  ) => {
+    setSubmitError(null)
+    try {
+      const created = await createLocation(data)
+
+      // Associate selected waste types after the location is created
+      if (wasteTypeIds.length > 0 && created?.id) {
+        await Promise.all(
+          wasteTypeIds.map((wId) => locationService.addWasteType(created.id, wId))
+        )
+      }
+
+      router.push('/locations')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al guardar la ubicación'
+      setSubmitError(message)
+    }
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.back()}>
+        <Button variant="outline" size="icon" onClick={() => router.push('/locations')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -31,6 +52,13 @@ export default function NewLocationPage() {
           </p>
         </div>
       </div>
+
+      {submitError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{submitError}</AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardContent className="p-6">

@@ -1,12 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useLocation } from '@/hooks/useLocations'
 import { LocationForm } from '@/components/forms/LocationForm'
+import { locationService } from '@/lib/services/location-service'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, AlertCircle } from 'lucide-react'
 import type { Location } from '@/types/database'
 
 export default function EditLocationPage() {
@@ -14,10 +17,32 @@ export default function EditLocationPage() {
   const router = useRouter()
   const locationId = parseInt(params.id as string)
   const { location, isLoading, updateLocation, isUpdating } = useLocation(locationId)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const handleSubmit = async (data: Omit<Location, 'id' | 'created_at' | 'updated_at'>) => {
-    await updateLocation(data)
-    router.push(`/locations/${locationId}`)
+  const handleSubmit = async (
+    data: Omit<Location, 'id' | 'created_at' | 'updated_at'>,
+    wasteTypeIds: number[]
+  ) => {
+    setSubmitError(null)
+    try {
+      await updateLocation(data)
+
+      // Sync waste type associations: remove all existing, then add the new selection
+      const existingIds = location?.waste_types?.map((wt) => wt.id) ?? []
+
+      const toRemove = existingIds.filter((id) => !wasteTypeIds.includes(id))
+      const toAdd = wasteTypeIds.filter((id) => !existingIds.includes(id))
+
+      await Promise.all([
+        ...toRemove.map((wId) => locationService.removeWasteType(locationId, wId)),
+        ...toAdd.map((wId) => locationService.addWasteType(locationId, wId)),
+      ])
+
+      router.push(`/locations/${locationId}`)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al actualizar la ubicación'
+      setSubmitError(message)
+    }
   }
 
   if (isLoading) {
@@ -44,7 +69,7 @@ export default function EditLocationPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.back()}>
+        <Button variant="outline" size="icon" onClick={() => router.push(`/locations/${locationId}`)}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -54,6 +79,13 @@ export default function EditLocationPage() {
           </p>
         </div>
       </div>
+
+      {submitError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{submitError}</AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardContent className="p-6">

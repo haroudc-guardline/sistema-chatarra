@@ -57,7 +57,14 @@ type LocationFormData = z.infer<typeof locationSchema>
 interface LocationFormProps {
   mode: 'create' | 'edit'
   initialData?: LocationWithDetails
-  onSubmit: (data: Omit<Location, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
+  /**
+   * Called with the clean location data (no waste_type_ids) and the selected
+   * waste type IDs separately so the parent can handle association correctly.
+   */
+  onSubmit: (
+    data: Omit<Location, 'id' | 'created_at' | 'updated_at'>,
+    wasteTypeIds: number[]
+  ) => Promise<void>
   isSubmitting?: boolean
 }
 
@@ -175,10 +182,16 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
   }
 
   const handleSubmit = async (data: LocationFormData) => {
-    await onSubmit({
-      ...data,
-      corregimiento: data.corregimiento || undefined,
-    } as Omit<Location, 'id' | 'created_at' | 'updated_at'>)
+    // Strip waste_type_ids — it's not a column in the locations table.
+    // Pass it separately so the parent can handle the association.
+    const { waste_type_ids, ...locationData } = data
+    await onSubmit(
+      {
+        ...locationData,
+        corregimiento: locationData.corregimiento || undefined,
+      } as Omit<Location, 'id' | 'created_at' | 'updated_at'>,
+      waste_type_ids
+    )
   }
 
   return (
