@@ -14,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useLocations } from '@/hooks/useLocations'
+import { locationService } from '@/lib/services/location-service'
 import { Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -43,7 +44,6 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
   useEffect(() => {
     const loadMunicipios = async () => {
       if (localFilters.ciudad) {
-        const { locationService } = await import('@/lib/services/location-service')
         const data = await locationService.getMunicipios(localFilters.ciudad)
         setMunicipios(data)
       } else {
@@ -53,7 +53,13 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
     loadMunicipios()
   }, [localFilters.ciudad])
 
-  const activeFiltersCount = Object.values(filters).filter(Boolean).length
+  // Count only non-empty active filters (empty arrays don't count)
+  const activeFiltersCount = [
+    filters.ciudad,
+    filters.municipio,
+    filters.search,
+    filters.wasteTypeIds?.length ? filters.wasteTypeIds : undefined,
+  ].filter(Boolean).length
 
   const handleApply = () => {
     onFiltersChange(localFilters)
@@ -68,11 +74,12 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
 
   const toggleWasteType = (id: number) => {
     setLocalFilters((prev) => {
-      const current = prev.wasteTypeIds || []
+      const current = prev.wasteTypeIds ?? []
       const updated = current.includes(id)
         ? current.filter((tid) => tid !== id)
         : [...current, id]
-      return { ...prev, wasteTypeIds: updated }
+      // Use undefined instead of [] so the filter is properly cleared
+      return { ...prev, wasteTypeIds: updated.length > 0 ? updated : undefined }
     })
   }
 
@@ -127,7 +134,7 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
         <div className="space-y-2">
           <Label htmlFor="ciudad">Ciudad</Label>
           <Select
-            value={localFilters.ciudad}
+            value={localFilters.ciudad ?? 'all'}
             onValueChange={(value) =>
               setLocalFilters((prev) => ({
                 ...prev,
@@ -154,7 +161,7 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
         <div className="space-y-2">
           <Label htmlFor="municipio">Municipio</Label>
           <Select
-            value={localFilters.municipio}
+            value={localFilters.municipio ?? 'all'}
             onValueChange={(value) =>
               setLocalFilters((prev) => ({
                 ...prev,

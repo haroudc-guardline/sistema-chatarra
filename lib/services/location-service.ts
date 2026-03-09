@@ -31,6 +31,26 @@ export const locationService = {
       query = query.ilike('nombre_institucion', `%${filters.search}%`)
     }
 
+    // Filter by waste types: fetch the location_ids that have ANY of the selected types,
+    // then restrict the main query to those IDs.
+    if (filters?.wasteTypeIds && filters.wasteTypeIds.length > 0) {
+      const { data: lwt, error: lwtError } = await supabase
+        .from('location_waste_types')
+        .select('location_id')
+        .in('waste_type_id', filters.wasteTypeIds)
+
+      if (lwtError) throw lwtError
+
+      const matchingIds = [...new Set((lwt ?? []).map((r) => r.location_id))]
+
+      if (matchingIds.length === 0) {
+        // No locations have the selected waste types → return empty list immediately
+        return [] as LocationWithDetails[]
+      }
+
+      query = query.in('id', matchingIds)
+    }
+
     const { data, error } = await query
 
     if (error) throw error
