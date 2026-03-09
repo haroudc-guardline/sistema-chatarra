@@ -4,11 +4,17 @@ import { NextResponse } from 'next/server'
 // Cache geography data for 24 hours at the CDN edge
 export const revalidate = 86400
 
+/**
+ * Use service role key to bypass RLS — geography data is public and
+ * this endpoint is called without a user JWT (it's a cached edge route).
+ * Falls back to anon key if service role is not configured.
+ */
 function createSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
 }
 
 /**

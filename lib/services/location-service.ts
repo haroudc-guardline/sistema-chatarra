@@ -120,15 +120,19 @@ export const locationService = {
     return data as WasteType[]
   },
 
-  // Get all provinces via cached API endpoint (24h CDN cache)
+  // Get all provinces — tries cached API first, falls back to direct Supabase query
   async getCities() {
     try {
-      const res = await fetch('/api/geography?type=provincias', { cache: 'force-cache' })
-      if (!res.ok) throw new Error('Failed to fetch provinces')
+      const res = await fetch('/api/geography?type=provincias')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { provincias } = await res.json()
-      return provincias as string[]
+      // If the API returned an empty list, fall through to direct query
+      if (Array.isArray(provincias) && provincias.length > 0) {
+        return provincias as string[]
+      }
+      throw new Error('Empty response from API')
     } catch {
-      // Fallback: query directly
+      // Fallback: query directly using the authenticated browser client
       const { data, error } = await supabase
         .from('panama_geography')
         .select('provincia')
@@ -138,19 +142,21 @@ export const locationService = {
     }
   },
 
-  // Get districts (municipios) for a province via cached API endpoint
+  // Get districts (municipios) for a province — tries cached API first
   async getMunicipios(ciudad?: string) {
     if (!ciudad) return [] as string[]
     try {
       const res = await fetch(
-        `/api/geography?type=distritos&provincia=${encodeURIComponent(ciudad)}`,
-        { cache: 'force-cache' }
+        `/api/geography?type=distritos&provincia=${encodeURIComponent(ciudad)}`
       )
-      if (!res.ok) throw new Error('Failed to fetch districts')
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { distritos } = await res.json()
-      return distritos as string[]
+      if (Array.isArray(distritos) && distritos.length > 0) {
+        return distritos as string[]
+      }
+      throw new Error('Empty response from API')
     } catch {
-      // Fallback: query directly
+      // Fallback: query directly using the authenticated browser client
       const { data, error } = await supabase
         .from('panama_geography')
         .select('distrito')
