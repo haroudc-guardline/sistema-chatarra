@@ -375,7 +375,7 @@ export default function SalesPage() {
           open={showPricesModal}
           onClose={() => setShowPricesModal(false)}
           marketPrices={marketPrices}
-          onSave={(id, updates) => updateMarketPrice({ id, updates })}
+          onSave={async (id, updates) => { await updateMarketPrice({ id, updates }) }}
           isSaving={isUpdatingPrice}
         />
       )}
