@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useWasteItems } from '@/hooks/useWasteItems'
 import { useAuth } from '@/hooks/useAuth'
+import { wasteItemService } from '@/lib/services/waste-item-service'
+import { WASTE_SUBCATEGORY_SUGGESTIONS } from '@/lib/constants/waste-subcategories'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -24,15 +26,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Trash2, Package, Weight, DollarSign, Star, AlertCircle, Loader2 } from 'lucide-react'
-import type { WasteType } from '@/types/database'
+import { Plus, Trash2, Package, Weight, DollarSign, Star, AlertCircle, Loader2, Camera, X, ImageIcon } from 'lucide-react'
+import type { WasteType, WasteItemPhoto } from '@/types/database'
 
 interface WasteItemManagerProps {
   locationId: number
   wasteTypes: WasteType[]
 }
 
-// Quality options for dropdown
 const QUALITY_OPTIONS = [
   { value: 'Excelente', label: 'Excelente', color: 'bg-emerald-100 text-emerald-800' },
   { value: 'Buena', label: 'Buena', color: 'bg-blue-100 text-blue-800' },
@@ -40,6 +41,10 @@ const QUALITY_OPTIONS = [
   { value: 'Baja', label: 'Baja', color: 'bg-orange-100 text-orange-800' },
   { value: 'Deficiente', label: 'Deficiente', color: 'bg-red-100 text-red-800' },
 ]
+
+function calculateValue(weightKg: number): number {
+  return (weightKg / 10000) * 100
+}
 
 export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerProps) {
   const { user } = useAuth()
@@ -52,7 +57,6 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
     deleteWasteItem,
   } = useWasteItems(locationId)
 
-  // Helper: resolve waste type name from join OR from local wasteTypes list as fallback
   const getWasteTypeName = (item: { waste_type?: { nombre?: string } | null; waste_type_id?: number }): string => {
     if (item.waste_type?.nombre) return item.waste_type.nombre
     if (item.waste_type_id) {
@@ -64,25 +68,74 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
 
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [pendingFiles, setPendingFiles] = useState<File[]>([])
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [newItem, setNewItem] = useState({
     waste_type_id: '',
+    subcategoria: '',
     volume: '',
     weight: '',
     value: '',
     quality: '',
   })
 
+  // Photo gallery state
+  const [photoGalleryItemId, setPhotoGalleryItemId] = useState<number | null>(null)
+  const [galleryPhotos, setGalleryPhotos] = useState<WasteItemPhoto[]>([])
+  const [isLoadingPhotos, setIsLoadingPhotos] = useState(false)
+  const [previewPhoto, setPreviewPhoto] = useState<WasteItemPhoto | null>(null)
+  const [photoCountMap, setPhotoCountMap] = useState<Record<number, number>>({})
+  const galleryFileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingGalleryPhotos, setIsUploadingGalleryPhotos] = useState(false)
+
+  // Get subcategory suggestions based on selected waste type
+  const subcategorySuggestions = useMemo(() => {
+    if (!newItem.waste_type_id) return []
+    const selectedType = wasteTypes.find(wt => wt.id === parseInt(newItem.waste_type_id))
+    if (!selectedType) return []
+    return WASTE_SUBCATEGORY_SUGGESTIONS[selectedType.nombre] || []
+  }, [newItem.waste_type_id, wasteTypes])
+
   useEffect(() => {
     fetchWasteItems()
   }, [fetchWasteItems])
 
-  // Check if user can edit (Admin or Operador)
+  // Load photo counts for all items
+  const loadPhotoCounts = useCallback(async () => {
+    const counts: Record<number, number> = {}
+    for (const item of wasteItems) {
+      try {
+        const photos = await wasteItemService.getPhotos(item.id)
+        counts[item.id] = photos.length
+      } catch {
+        counts[item.id] = 0
+      }
+    }
+    setPhotoCountMap(counts)
+  }, [wasteItems])
+
+  useEffect(() => {
+    if (wasteItems.length > 0) {
+      loadPhotoCounts()
+    }
+  }, [wasteItems.length, loadPhotoCounts])
+
   const canEdit = user?.rol === 'admin' || user?.rol === 'operador'
+
+  const handleWeightChange = (weightStr: string) => {
+    const w = parseFloat(weightStr) || 0
+    const calculatedValue = calculateValue(w)
+    setNewItem({
+      ...newItem,
+      weight: weightStr,
+      value: w > 0 ? calculatedValue.toFixed(2) : '',
+    })
+  }
 
   const handleAddItem = async () => {
     setError(null)
-    
-    // Validation
+
     if (!newItem.waste_type_id) {
       setError('Debes seleccionar un tipo de residuo')
       return
@@ -95,22 +148,34 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
       setError('El peso debe ser mayor a 0')
       return
     }
-    if (!newItem.value || parseFloat(newItem.value) < 0) {
-      setError('El valor no puede ser negativo')
-      return
-    }
 
     try {
-      await createWasteItem({
+      const createdItem = await createWasteItem({
         waste_type_id: parseInt(newItem.waste_type_id),
+        subcategoria: newItem.subcategoria || null,
         volume: parseFloat(newItem.volume),
         weight: parseFloat(newItem.weight),
-        value: parseFloat(newItem.value),
+        value: parseFloat(newItem.value) || calculateValue(parseFloat(newItem.weight)),
         quality: newItem.quality || null,
       })
+
+      // Upload pending photos if any
+      if (pendingFiles.length > 0 && createdItem?.id) {
+        setIsUploadingPhotos(true)
+        try {
+          await wasteItemService.uploadPhotos(createdItem.id, pendingFiles)
+        } catch (e) {
+          console.error('Error uploading photos:', e)
+        } finally {
+          setIsUploadingPhotos(false)
+        }
+      }
+
       setShowAddDialog(false)
-      setNewItem({ waste_type_id: '', volume: '', weight: '', value: '', quality: '' })
+      setNewItem({ waste_type_id: '', subcategoria: '', volume: '', weight: '', value: '', quality: '' })
+      setPendingFiles([])
       setError(null)
+      loadPhotoCounts()
     } catch (error: any) {
       console.error('Error adding waste item:', error)
       setError(error?.message || 'Error al agregar el item. Verifica que tienes permisos.')
@@ -125,6 +190,70 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
         console.error('Error deleting waste item:', error)
         alert('Error al eliminar el item')
       }
+    }
+  }
+
+  // Pending file management in add dialog
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024 && f.type.startsWith('image/'))
+    setPendingFiles(prev => [...prev, ...validFiles].slice(0, 10))
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const removePendingFile = (index: number) => {
+    setPendingFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // Photo gallery
+  const openPhotoGallery = async (itemId: number) => {
+    setPhotoGalleryItemId(itemId)
+    setIsLoadingPhotos(true)
+    try {
+      const photos = await wasteItemService.getPhotos(itemId)
+      setGalleryPhotos(photos)
+    } catch {
+      setGalleryPhotos([])
+    } finally {
+      setIsLoadingPhotos(false)
+    }
+  }
+
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!photoGalleryItemId) return
+    if (!confirm('¿Eliminar esta foto?')) return
+    try {
+      await wasteItemService.deletePhoto(photoGalleryItemId, photoId)
+      setGalleryPhotos(prev => prev.filter(p => p.id !== photoId))
+      setPhotoCountMap(prev => ({
+        ...prev,
+        [photoGalleryItemId]: (prev[photoGalleryItemId] || 1) - 1,
+      }))
+    } catch {
+      alert('Error al eliminar la foto')
+    }
+  }
+
+  const handleGalleryFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!photoGalleryItemId) return
+    const files = Array.from(e.target.files || []).filter(
+      f => f.size <= 5 * 1024 * 1024 && f.type.startsWith('image/')
+    )
+    if (!files.length) return
+
+    setIsUploadingGalleryPhotos(true)
+    try {
+      const uploaded = await wasteItemService.uploadPhotos(photoGalleryItemId, files)
+      setGalleryPhotos(prev => [...uploaded, ...prev])
+      setPhotoCountMap(prev => ({
+        ...prev,
+        [photoGalleryItemId]: (prev[photoGalleryItemId] || 0) + uploaded.length,
+      }))
+    } catch (err: any) {
+      alert(err.message || 'Error al subir fotos')
+    } finally {
+      setIsUploadingGalleryPhotos(false)
+      if (galleryFileInputRef.current) galleryFileInputRef.current.value = ''
     }
   }
 
@@ -207,26 +336,32 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
                 key={item.id}
                 className="flex items-center justify-between p-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
               >
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap">
                   <Badge className="bg-red-100 text-red-800 font-medium px-3 py-1">
                     {getWasteTypeName(item)}
                   </Badge>
-                  
+
+                  {item.subcategoria && (
+                    <Badge variant="outline" className="text-slate-600 font-medium px-2 py-1">
+                      {item.subcategoria}
+                    </Badge>
+                  )}
+
                   <div className="flex items-center gap-1.5 text-sm text-slate-600">
                     <Package className="h-4 w-4 text-slate-400" />
                     <span className="font-medium">{item.volume} m³</span>
                   </div>
-                  
+
                   <div className="flex items-center gap-1.5 text-sm text-slate-600">
                     <Weight className="h-4 w-4 text-slate-400" />
                     <span className="font-medium">{item.weight} kg</span>
                   </div>
-                  
+
                   <div className="flex items-center gap-1.5 text-sm text-slate-600">
                     <DollarSign className="h-4 w-4 text-slate-400" />
                     <span className="font-medium">${item.value}</span>
                   </div>
-                  
+
                   {item.quality && (
                     <div className="flex items-center gap-1.5">
                       <Star className="h-4 w-4 text-amber-400" />
@@ -235,8 +370,18 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
                       </Badge>
                     </div>
                   )}
+
+                  {/* Photo count badge */}
+                  <button
+                    onClick={() => openPhotoGallery(item.id)}
+                    className="flex items-center gap-1 text-sm text-slate-500 hover:text-blue-600 transition-colors cursor-pointer"
+                    title="Ver fotos"
+                  >
+                    <Camera className="h-4 w-4" />
+                    <span className="font-medium">{photoCountMap[item.id] ?? 0}</span>
+                  </button>
                 </div>
-                
+
                 {canEdit && (
                   <Button
                     variant="ghost"
@@ -253,29 +398,36 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
         )}
 
         {/* Add Dialog */}
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogContent className="sm:max-w-[500px]">
+        <Dialog open={showAddDialog} onOpenChange={(open) => {
+          setShowAddDialog(open)
+          if (!open) {
+            setPendingFiles([])
+            setError(null)
+          }
+        }}>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Agregar Item de Residuo</DialogTitle>
               <DialogDescription>
                 Ingresa los detalles del nuevo item de residuo.
               </DialogDescription>
             </DialogHeader>
-            
+
             {error && (
               <Alert variant="destructive" className="mt-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             <div className="space-y-4 py-4">
+              {/* Waste Type */}
               <div className="space-y-2">
                 <Label htmlFor="waste-type">Tipo de Residuo *</Label>
                 <Select
                   value={newItem.waste_type_id}
                   onValueChange={(value) =>
-                    setNewItem({ ...newItem, waste_type_id: value })
+                    setNewItem({ ...newItem, waste_type_id: value, subcategoria: '' })
                   }
                 >
                   <SelectTrigger id="waste-type">
@@ -293,7 +445,45 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
                   </SelectContent>
                 </Select>
               </div>
-              
+
+              {/* Subcategoria */}
+              <div className="space-y-2">
+                <Label htmlFor="subcategoria">Subcategoría</Label>
+                <Input
+                  id="subcategoria"
+                  list="subcategoria-suggestions"
+                  value={newItem.subcategoria}
+                  onChange={(e) => setNewItem({ ...newItem, subcategoria: e.target.value })}
+                  placeholder={subcategorySuggestions.length > 0 ? `Ej: ${subcategorySuggestions[0]}` : 'Especifica el item (opcional)'}
+                />
+                {subcategorySuggestions.length > 0 && (
+                  <datalist id="subcategoria-suggestions">
+                    {subcategorySuggestions.map((s) => (
+                      <option key={s} value={s} />
+                    ))}
+                  </datalist>
+                )}
+                {subcategorySuggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {subcategorySuggestions.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setNewItem({ ...newItem, subcategoria: s })}
+                        className={`text-xs px-2 py-1 rounded-full border transition-colors ${
+                          newItem.subcategoria === s
+                            ? 'bg-blue-100 border-blue-300 text-blue-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Volume and Weight */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="volume">Volumen (m³) *</Label>
@@ -317,28 +507,27 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
                     step="0.01"
                     min="0.01"
                     value={newItem.weight}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, weight: e.target.value })
-                    }
+                    onChange={(e) => handleWeightChange(e.target.value)}
                     placeholder="0.00"
                   />
                 </div>
               </div>
-              
+
+              {/* Value (auto-calculated) and Quality */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="value">Valor ($) *</Label>
+                  <Label htmlFor="value">Valor ($)</Label>
                   <Input
                     id="value"
                     type="number"
                     step="0.01"
                     min="0"
                     value={newItem.value}
-                    onChange={(e) =>
-                      setNewItem({ ...newItem, value: e.target.value })
-                    }
+                    disabled
+                    className="bg-slate-50"
                     placeholder="0.00"
                   />
+                  <p className="text-xs text-slate-400">Auto-calculado: peso/10,000 × $100/ton</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="quality">Calidad</Label>
@@ -365,30 +554,177 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
                   </Select>
                 </div>
               </div>
+
+              {/* Photo Upload Section */}
+              <div className="space-y-2">
+                <Label>Fotos del Item</Label>
+                <div
+                  className="border-2 border-dashed border-slate-200 rounded-lg p-4 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <ImageIcon className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm text-slate-500">Haz clic para agregar fotos</p>
+                  <p className="text-xs text-slate-400">Max 10 fotos, 5MB cada una (JPG, PNG, WebP)</p>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+
+                {/* Pending file previews */}
+                {pendingFiles.length > 0 && (
+                  <div className="grid grid-cols-5 gap-2 mt-2">
+                    {pendingFiles.map((file, i) => (
+                      <div key={i} className="relative group">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-full h-20 object-cover rounded-lg border border-slate-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePendingFile(i)}
+                          className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-            
+
             <DialogFooter>
               <Button variant="outline" onClick={() => {
                 setShowAddDialog(false)
                 setError(null)
+                setPendingFiles([])
               }}>
                 Cancelar
               </Button>
-              <Button 
-                onClick={handleAddItem} 
-                disabled={isCreating}
+              <Button
+                onClick={handleAddItem}
+                disabled={isCreating || isUploadingPhotos}
                 className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
               >
-                {isCreating ? (
+                {isCreating || isUploadingPhotos ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Agregando...
+                    {isUploadingPhotos ? 'Subiendo fotos...' : 'Agregando...'}
                   </>
                 ) : (
                   'Agregar Item'
                 )}
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Photo Gallery Dialog */}
+        <Dialog open={photoGalleryItemId !== null} onOpenChange={(open) => {
+          if (!open) {
+            setPhotoGalleryItemId(null)
+            setGalleryPhotos([])
+            setPreviewPhoto(null)
+          }
+        }}>
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Fotos del Item
+              </DialogTitle>
+              <DialogDescription>
+                {galleryPhotos.length} {galleryPhotos.length === 1 ? 'foto' : 'fotos'}
+              </DialogDescription>
+            </DialogHeader>
+
+            {isLoadingPhotos ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                <span className="ml-2 text-slate-500">Cargando fotos...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Upload button */}
+                {canEdit && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => galleryFileInputRef.current?.click()}
+                      disabled={isUploadingGalleryPhotos}
+                    >
+                      {isUploadingGalleryPhotos ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="mr-2 h-4 w-4" />
+                      )}
+                      Agregar Fotos
+                    </Button>
+                    <input
+                      ref={galleryFileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      className="hidden"
+                      onChange={handleGalleryFileUpload}
+                    />
+                  </div>
+                )}
+
+                {galleryPhotos.length === 0 ? (
+                  <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <ImageIcon className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-slate-500 font-medium">No hay fotos</p>
+                    <p className="text-sm text-slate-400 mt-1">
+                      {canEdit ? 'Agrega fotos para documentar el estado del item' : ''}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-3">
+                    {galleryPhotos.map((photo) => (
+                      <div key={photo.id} className="relative group">
+                        <img
+                          src={photo.public_url}
+                          alt={photo.file_name}
+                          className="w-full h-40 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => setPreviewPhoto(photo)}
+                        />
+                        {canEdit && (
+                          <button
+                            onClick={() => handleDeletePhoto(photo.id)}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Full Size Photo Preview */}
+        <Dialog open={previewPhoto !== null} onOpenChange={(open) => {
+          if (!open) setPreviewPhoto(null)
+        }}>
+          <DialogContent className="sm:max-w-[90vw] max-h-[90vh] p-2">
+            {previewPhoto && (
+              <img
+                src={previewPhoto.public_url}
+                alt={previewPhoto.file_name}
+                className="w-full h-full max-h-[85vh] object-contain rounded-lg"
+              />
+            )}
           </DialogContent>
         </Dialog>
       </CardContent>

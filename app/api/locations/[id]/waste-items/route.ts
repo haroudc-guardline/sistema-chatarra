@@ -29,7 +29,7 @@ export async function GET(
   // Use Supabase alias syntax: waste_type:waste_types(*) to get the join as singular name
   const { data: wasteItems, error } = await supabase
     .from('waste_items')
-    .select('id, location_id, waste_type_id, volume, weight, value, quality, created_at, waste_type:waste_types(*)')
+    .select('id, location_id, waste_type_id, subcategoria, volume, weight, value, quality, created_at, waste_type:waste_types(*)')
     .eq('location_id', id)
     .order('created_at', { ascending: false })
 
@@ -74,6 +74,7 @@ export async function POST(
     const insertData = {
       location_id: parseInt(id),
       waste_type_id: Number(body.waste_type_id),
+      subcategoria: body.subcategoria || null,
       volume: Number(body.volume),
       weight: Number(body.weight),
       value: Number(body.value),
@@ -95,7 +96,7 @@ export async function POST(
     // Step 2: Fetch with join using alias syntax
     const { data: newItem, error: fetchError } = await supabase
       .from('waste_items')
-      .select('id, location_id, waste_type_id, volume, weight, value, quality, created_at, waste_type:waste_types(*)')
+      .select('id, location_id, waste_type_id, subcategoria, volume, weight, value, quality, created_at, waste_type:waste_types(*)')
       .eq('id', inserted.id)
       .single()
 

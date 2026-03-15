@@ -27,6 +27,7 @@ import {
   ChevronRight,
   Leaf,
   ShoppingCart,
+  Package,
 } from 'lucide-react'
 
 interface NavItem {
@@ -51,6 +52,11 @@ const navItems: NavItem[] = [
     href: '/locations',
     label: 'Ubicaciones',
     icon: <Building2 className="h-5 w-5" />,
+  },
+  {
+    href: '/inventory',
+    label: 'Inventario',
+    icon: <Package className="h-5 w-5" />,
   },
   {
     href: '/users',

@@ -81,12 +81,30 @@ export interface WasteItem {
   id: number
   location_id: number
   waste_type_id: number
+  subcategoria?: string | null
   volume: number
   weight: number
   value: number
   quality?: string | null
   created_at: string
   waste_type?: WasteType
+  photos?: WasteItemPhoto[]
+  photo_count?: number
+}
+
+export interface WasteItemPhoto {
+  id: number
+  waste_item_id: number
+  file_name: string
+  file_path: string
+  file_size: number
+  uploaded_by?: string
+  created_at: string
+  public_url?: string
+}
+
+export interface WasteItemWithLocation extends WasteItem {
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio' | 'direccion'>
 }
 
 export interface MarketPrice {

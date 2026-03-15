@@ -454,6 +454,7 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
                     )}
                   />
                 </div>
+                <p className="text-xs text-slate-400">Valores estimados a nivel de ubicación. Los items individuales se gestionan en la página de detalle.</p>
 
                 <FormField
                   control={form.control}
