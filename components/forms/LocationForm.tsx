@@ -30,7 +30,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { MapComponent } from '@/components/map/MapComponent'
 import { PlacesAutocomplete } from '@/components/map/PlacesAutocomplete'
 import { FileUpload } from './FileUpload'
-import { CreatableWasteTypeSelect } from '@/components/waste/CreatableWasteTypeSelect'
+import { InlineWasteItemEditor, type PendingWasteItem } from '@/components/waste/InlineWasteItemEditor'
 import { Loader2, MapPin, Search } from 'lucide-react'
 import type { Location, LocationWithDetails } from '@/types/database'
 import { locationService } from '@/lib/services/location-service'
@@ -43,13 +43,9 @@ const locationSchema = z.object({
   ciudad: z.string().min(1, 'La ciudad es requerida'),
   municipio: z.string().min(1, 'El municipio es requerido'),
   corregimiento: z.string().optional(),
-  volumen: z.number().min(0, 'El volumen debe ser positivo'),
-  peso_estimado: z.number().min(0, 'El peso debe ser positivo'),
-  costo_valor: z.number().min(0, 'El valor debe ser positivo'),
   telefono_responsable: z.string().min(1, 'El teléfono es requerido'),
   email_responsable: z.string().email('Email inválido').optional().or(z.literal('')),
   nombre_responsable: z.string().min(1, 'El nombre del responsable es requerido'),
-  waste_type_ids: z.array(z.number()).min(1, 'Selecciona al menos un tipo de residuo'),
 })
 
 type LocationFormData = z.infer<typeof locationSchema>
@@ -57,20 +53,27 @@ type LocationFormData = z.infer<typeof locationSchema>
 interface LocationFormProps {
   mode: 'create' | 'edit'
   initialData?: LocationWithDetails
-  /**
-   * Called with the clean location data (no waste_type_ids) and the selected
-   * waste type IDs separately so the parent can handle association correctly.
-   */
+  initialExistingItems?: Array<{
+    id: number
+    waste_type_name: string
+    subcategoria?: string | null
+    volume: number
+    weight: number
+    value: number
+    quality?: string | null
+  }>
   onSubmit: (
     data: Omit<Location, 'id' | 'created_at' | 'updated_at'>,
-    wasteTypeIds: number[]
+    wasteTypeIds: number[],
+    pendingItems: PendingWasteItem[]
   ) => Promise<void>
   isSubmitting?: boolean
 }
 
-export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: LocationFormProps) {
+export function LocationForm({ mode, initialData, initialExistingItems = [], onSubmit, isSubmitting }: LocationFormProps) {
   const router = useRouter()
-  const { wasteTypes, cities, createWasteType } = useLocations()
+  const { wasteTypes, cities } = useLocations()
+  const [pendingItems, setPendingItems] = useState<PendingWasteItem[]>([])
   const [municipios, setMunicipios] = useState<string[]>([])
   const [isLoadingMunicipios, setIsLoadingMunicipios] = useState(false)
   const [isGeocoding, setIsGeocoding] = useState(false)
@@ -90,13 +93,9 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
       ciudad: initialData?.ciudad || '',
       municipio: initialData?.municipio || '',
       corregimiento: initialData?.corregimiento || '',
-      volumen: initialData?.volumen || 0,
-      peso_estimado: initialData?.peso_estimado || 0,
-      costo_valor: initialData?.costo_valor || 0,
       telefono_responsable: initialData?.telefono_responsable || initialData?.contacto_responsable || '',
       email_responsable: initialData?.email_responsable || '',
       nombre_responsable: initialData?.nombre_responsable || '',
-      waste_type_ids: initialData?.waste_types?.map((wt) => wt.id) || [],
     },
   })
 
@@ -173,24 +172,29 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
     }
   }
 
-  const toggleWasteType = (id: number) => {
-    const current = form.getValues('waste_type_ids')
-    const updated = current.includes(id)
-      ? current.filter((tid) => tid !== id)
-      : [...current, id]
-    form.setValue('waste_type_ids', updated)
-  }
-
   const handleSubmit = async (data: LocationFormData) => {
-    // Strip waste_type_ids — it's not a column in the locations table.
-    // Pass it separately so the parent can handle the association.
-    const { waste_type_ids, ...locationData } = data
+    // Calculate aggregates from items (existing + pending)
+    const allItemsForCalc = [
+      ...initialExistingItems.map(ei => ({ volume: ei.volume, weight: ei.weight, value: ei.value, waste_type_id: 0 })),
+      ...pendingItems.map(i => ({ volume: i.volume, weight: i.weight, value: i.value, waste_type_id: i.waste_type_id })),
+    ]
+    const volumen = allItemsForCalc.reduce((sum, i) => sum + (i.volume || 0), 0)
+    const peso_estimado = allItemsForCalc.reduce((sum, i) => sum + (i.weight || 0), 0)
+    const costo_valor = allItemsForCalc.reduce((sum, i) => sum + (i.value || 0), 0)
+
+    // Derive unique waste type IDs from pending items
+    const wasteTypeIds = [...new Set(pendingItems.map(i => i.waste_type_id))]
+
     await onSubmit(
       {
-        ...locationData,
-        corregimiento: locationData.corregimiento || undefined,
+        ...data,
+        volumen,
+        peso_estimado,
+        costo_valor,
+        corregimiento: data.corregimiento || undefined,
       } as Omit<Location, 'id' | 'created_at' | 'updated_at'>,
-      waste_type_ids
+      wasteTypeIds,
+      pendingItems
     )
   }
 
@@ -393,86 +397,14 @@ export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: Loca
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Detalles del Residuo</CardTitle>
+                <CardTitle>Items de Residuos</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="volumen"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Volumen (m³) *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="peso_estimado"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Peso (kg) *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="costo_valor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Valor ($) *</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <p className="text-xs text-slate-400">Valores estimados a nivel de ubicación. Los items individuales se gestionan en la página de detalle.</p>
-
-                <FormField
-                  control={form.control}
-                  name="waste_type_ids"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipos de Residuos *</FormLabel>
-                      <FormControl>
-                        <CreatableWasteTypeSelect
-                          wasteTypes={wasteTypes || []}
-                          selectedIds={field.value}
-                          onChange={field.onChange}
-                          onCreateWasteType={createWasteType}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <CardContent>
+                <InlineWasteItemEditor
+                  wasteTypes={wasteTypes || []}
+                  items={pendingItems}
+                  onChange={setPendingItems}
+                  existingItems={initialExistingItems}
                 />
               </CardContent>
             </Card>

@@ -1,16 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useLocation } from '@/hooks/useLocations'
 import { LocationForm } from '@/components/forms/LocationForm'
 import { locationService } from '@/lib/services/location-service'
+import { wasteItemService } from '@/lib/services/waste-item-service'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
-import type { Location } from '@/types/database'
+import type { Location, WasteItem } from '@/types/database'
+import type { PendingWasteItem } from '@/components/waste/InlineWasteItemEditor'
 
 export default function EditLocationPage() {
   const params = useParams()
@@ -18,25 +20,84 @@ export default function EditLocationPage() {
   const locationId = parseInt(params.id as string)
   const { location, isLoading, updateLocation, isUpdating } = useLocation(locationId)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [existingItems, setExistingItems] = useState<Array<{
+    id: number
+    waste_type_name: string
+    subcategoria?: string | null
+    volume: number
+    weight: number
+    value: number
+    quality?: string | null
+  }>>([])
+
+  // Load existing waste items for this location
+  useEffect(() => {
+    if (!locationId) return
+    const loadItems = async () => {
+      try {
+        const response = await fetch(`/api/locations/${locationId}/waste-items`)
+        if (response.ok) {
+          const items: WasteItem[] = await response.json()
+          setExistingItems(items.map(item => ({
+            id: item.id,
+            waste_type_name: item.waste_type?.nombre || 'Sin tipo',
+            subcategoria: item.subcategoria,
+            volume: item.volume,
+            weight: item.weight,
+            value: item.value,
+            quality: item.quality,
+          })))
+        }
+      } catch (e) {
+        console.error('Error loading existing items:', e)
+      }
+    }
+    loadItems()
+  }, [locationId])
 
   const handleSubmit = async (
     data: Omit<Location, 'id' | 'created_at' | 'updated_at'>,
-    wasteTypeIds: number[]
+    wasteTypeIds: number[],
+    pendingItems: PendingWasteItem[]
   ) => {
     setSubmitError(null)
     try {
       await updateLocation(data)
 
-      // Sync waste type associations: remove all existing, then add the new selection
-      const existingIds = location?.waste_types?.map((wt) => wt.id) ?? []
+      // Sync waste type associations
+      const existingTypeIds = location?.waste_types?.map((wt) => wt.id) ?? []
+      // Combine existing waste type associations with new ones from pending items
+      const allWasteTypeIds = [...new Set([...existingTypeIds, ...wasteTypeIds])]
+      const toAdd = allWasteTypeIds.filter((id) => !existingTypeIds.includes(id))
 
-      const toRemove = existingIds.filter((id) => !wasteTypeIds.includes(id))
-      const toAdd = wasteTypeIds.filter((id) => !existingIds.includes(id))
+      await Promise.all(
+        toAdd.map((wId) => locationService.addWasteType(locationId, wId))
+      )
 
-      await Promise.all([
-        ...toRemove.map((wId) => locationService.removeWasteType(locationId, wId)),
-        ...toAdd.map((wId) => locationService.addWasteType(locationId, wId)),
-      ])
+      // Create new waste items
+      for (const item of pendingItems) {
+        const response = await fetch(`/api/locations/${locationId}/waste-items`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            waste_type_id: item.waste_type_id,
+            subcategoria: item.subcategoria,
+            volume: item.volume,
+            weight: item.weight,
+            value: item.value,
+            quality: item.quality,
+          }),
+        })
+
+        if (response.ok && item.pendingPhotos.length > 0) {
+          const createdItem = await response.json()
+          try {
+            await wasteItemService.uploadPhotos(createdItem.id, item.pendingPhotos)
+          } catch (e) {
+            console.error('Error uploading photos for item:', e)
+          }
+        }
+      }
 
       router.push(`/locations/${locationId}`)
     } catch (err: unknown) {
@@ -92,6 +153,7 @@ export default function EditLocationPage() {
           <LocationForm
             mode="edit"
             initialData={location}
+            initialExistingItems={existingItems}
             onSubmit={handleSubmit}
             isSubmitting={isUpdating}
           />

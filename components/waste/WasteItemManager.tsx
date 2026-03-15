@@ -43,7 +43,7 @@ const QUALITY_OPTIONS = [
 ]
 
 function calculateValue(weightKg: number): number {
-  return (weightKg / 10000) * 100
+  return (weightKg / 1000) * 100
 }
 
 export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerProps) {
@@ -527,7 +527,7 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
                     className="bg-slate-50"
                     placeholder="0.00"
                   />
-                  <p className="text-xs text-slate-400">Auto-calculado: peso/10,000 × $100/ton</p>
+                  <p className="text-xs text-slate-400">Auto-calculado: peso/1,000 × $100/ton</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="quality">Calidad</Label>

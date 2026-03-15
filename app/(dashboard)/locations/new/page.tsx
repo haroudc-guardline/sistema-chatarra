@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation'
 import { useLocations } from '@/hooks/useLocations'
 import { LocationForm } from '@/components/forms/LocationForm'
 import { locationService } from '@/lib/services/location-service'
+import { wasteItemService } from '@/lib/services/waste-item-service'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
 import type { Location } from '@/types/database'
+import type { PendingWasteItem } from '@/components/waste/InlineWasteItemEditor'
 
 export default function NewLocationPage() {
   const router = useRouter()
@@ -18,20 +20,50 @@ export default function NewLocationPage() {
 
   const handleSubmit = async (
     data: Omit<Location, 'id' | 'created_at' | 'updated_at'>,
-    wasteTypeIds: number[]
+    wasteTypeIds: number[],
+    pendingItems: PendingWasteItem[]
   ) => {
     setSubmitError(null)
     try {
       const created = await createLocation(data)
 
-      // Associate selected waste types after the location is created
-      if (wasteTypeIds.length > 0 && created?.id) {
+      if (!created?.id) {
+        throw new Error('Error al crear la ubicación')
+      }
+
+      // Associate selected waste types
+      if (wasteTypeIds.length > 0) {
         await Promise.all(
           wasteTypeIds.map((wId) => locationService.addWasteType(created.id, wId))
         )
       }
 
-      router.push('/locations')
+      // Create waste items
+      for (const item of pendingItems) {
+        const response = await fetch(`/api/locations/${created.id}/waste-items`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            waste_type_id: item.waste_type_id,
+            subcategoria: item.subcategoria,
+            volume: item.volume,
+            weight: item.weight,
+            value: item.value,
+            quality: item.quality,
+          }),
+        })
+
+        if (response.ok && item.pendingPhotos.length > 0) {
+          const createdItem = await response.json()
+          try {
+            await wasteItemService.uploadPhotos(createdItem.id, item.pendingPhotos)
+          } catch (e) {
+            console.error('Error uploading photos for item:', e)
+          }
+        }
+      }
+
+      router.push(`/locations/${created.id}`)
     } catch (err: unknown) {
       console.error('Error creating location:', err)
       const message =
