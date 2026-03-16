@@ -21,6 +21,7 @@ export async function GET(request: Request) {
   const supabase = createSupabaseClient(cookieStore)
 
   const { searchParams } = new URL(request.url)
+  const zona = searchParams.get('zona')
   const wasteTypeId = searchParams.get('waste_type_id')
   const subcategoria = searchParams.get('subcategoria')
   const quality = searchParams.get('quality')
@@ -38,6 +39,27 @@ export async function GET(request: Request) {
     )
     .order('created_at', { ascending: false })
 
+  if (zona) {
+    // Filter by zone - need to get cities for the zone
+    const zoneCities: Record<string, string[]> = {
+      '1': ['Panamá', 'Panamá Oeste', 'Colón', 'Darién'],
+      '2': ['Veraguas', 'Coclé', 'Herrera', 'Los Santos'],
+      '3': ['Chiriquí', 'Bocas del Toro'],
+    }
+    const cities = zoneCities[zona]
+    if (cities) {
+      // Get location IDs in the zone
+      const { data: zoneLocations } = await supabase
+        .from('locations')
+        .select('id')
+        .in('ciudad', cities)
+      if (zoneLocations?.length) {
+        query = query.in('location_id', zoneLocations.map(l => l.id))
+      } else {
+        return NextResponse.json({ data: [], count: 0 })
+      }
+    }
+  }
   if (wasteTypeId) {
     query = query.eq('waste_type_id', parseInt(wasteTypeId))
   }

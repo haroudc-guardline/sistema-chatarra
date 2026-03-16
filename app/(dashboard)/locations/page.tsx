@@ -38,6 +38,7 @@ export default function LocationsPage() {
   const router = useRouter()
   const { isOperador, isAdmin } = useAuth()
   const [filters, setFilters] = useState<{
+    zona?: number
     ciudad?: string
     municipio?: string
     search?: string

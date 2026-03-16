@@ -41,6 +41,7 @@ export default function InventoryPage() {
     search: string
     waste_type_id?: number
     quality?: string
+    zona?: number
   }>({
     search: '',
   })
@@ -49,7 +50,7 @@ export default function InventoryPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const searchTimeout = useState<NodeJS.Timeout | null>(null)
 
-  const handleFiltersChange = (newFilters: { search: string; waste_type_id?: number; quality?: string }) => {
+  const handleFiltersChange = (newFilters: { search: string; waste_type_id?: number; quality?: string; zona?: number }) => {
     setFilters(newFilters)
     setPage(1)
 
@@ -63,6 +64,7 @@ export default function InventoryPage() {
   }
 
   const { items, totalCount, isLoading } = useWasteItemSearch({
+    zona: filters.zona,
     search: debouncedSearch || undefined,
     waste_type_id: filters.waste_type_id,
     quality: filters.quality,

@@ -17,15 +17,18 @@ import { useLocations } from '@/hooks/useLocations'
 import { locationService } from '@/lib/services/location-service'
 import { Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ZONES, getCitiesForZone } from '@/lib/constants/zones'
 
 interface FilterPanelProps {
   filters: {
+    zona?: number
     ciudad?: string
     municipio?: string
     search?: string
     wasteTypeIds?: number[]
   }
   onFiltersChange: (filters: {
+    zona?: number
     ciudad?: string
     municipio?: string
     search?: string
@@ -58,8 +61,14 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
     loadMunicipios()
   }, [localFilters.ciudad])
 
+  // Filter cities by zone if a zone is selected
+  const availableCities = localFilters.zona
+    ? cities?.filter(c => getCitiesForZone(localFilters.zona!).includes(c))
+    : cities
+
   // Count only non-empty active filters (empty arrays don't count)
   const activeFiltersCount = [
+    filters.zona,
     filters.ciudad,
     filters.municipio,
     filters.search,
@@ -135,6 +144,37 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
           </div>
         </div>
 
+        {/* Zone */}
+        <div className="space-y-2">
+          <Label>Zona</Label>
+          <Select
+            value={localFilters.zona?.toString() ?? 'all'}
+            onValueChange={(value) =>
+              setLocalFilters((prev) => ({
+                ...prev,
+                zona: value === 'all' ? undefined : parseInt(value),
+                ciudad: undefined,
+                municipio: undefined,
+              }))
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Todas las zonas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las zonas</SelectItem>
+              {ZONES.map((zone) => (
+                <SelectItem key={zone.id} value={zone.id.toString()}>
+                  <div className="flex flex-col">
+                    <span>{zone.label}</span>
+                    <span className="text-xs text-slate-500">{zone.provincias.join(', ')}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* City */}
         <div className="space-y-2">
           <Label htmlFor="ciudad">Ciudad</Label>
@@ -153,7 +193,7 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las ciudades</SelectItem>
-              {cities?.map((city) => (
+              {availableCities?.map((city) => (
                 <SelectItem key={city} value={city}>
                   {city}
                 </SelectItem>

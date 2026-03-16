@@ -1,6 +1,7 @@
 import type { WasteItemPhoto, WasteItemWithLocation } from '@/types/database'
 
 export interface WasteItemSearchFilters {
+  zona?: number
   waste_type_id?: number
   subcategoria?: string
   quality?: string
@@ -15,6 +16,7 @@ export const wasteItemService = {
     filters: WasteItemSearchFilters
   ): Promise<{ data: WasteItemWithLocation[]; count: number }> {
     const params = new URLSearchParams()
+    if (filters.zona) params.set('zona', filters.zona.toString())
     if (filters.waste_type_id) params.set('waste_type_id', filters.waste_type_id.toString())
     if (filters.subcategoria) params.set('subcategoria', filters.subcategoria)
     if (filters.quality) params.set('quality', filters.quality)

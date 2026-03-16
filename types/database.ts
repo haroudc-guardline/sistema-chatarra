@@ -28,6 +28,7 @@ export interface Location {
   telefono_responsable?: string
   email_responsable?: string
   nombre_responsable: string
+  zona?: number | null
   ultima_actualizacion?: string
   created_at: string
   updated_at?: string

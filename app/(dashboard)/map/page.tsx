@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocations } from '@/hooks/useLocations'
 import { MapComponent } from '@/components/map/MapComponent'
 import { FilterPanel } from '@/components/data/FilterPanel'
@@ -14,12 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Filter, X, MapPin, SlidersHorizontal } from 'lucide-react'
+import { Filter, X, MapPin, SlidersHorizontal, Building2, Package, Weight, DollarSign } from 'lucide-react'
+import { getZoneLabel } from '@/lib/constants/zones'
 import type { LocationWithDetails } from '@/types/database'
 import Link from 'next/link'
 
 export default function MapPage() {
   const [filters, setFilters] = useState<{
+    zona?: number
     ciudad?: string
     municipio?: string
     search?: string
@@ -27,20 +29,86 @@ export default function MapPage() {
   }>({})
   const [selectedLocation, setSelectedLocation] = useState<LocationWithDetails | null>(null)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
+  const [zoneSummary, setZoneSummary] = useState<{ items: number; weight: number; value: number } | null>(null)
 
   const { locations, isLoading } = useLocations(filters)
+
+  // Load zone summary when zone filter is active
+  useEffect(() => {
+    if (!filters.zona) {
+      setZoneSummary(null)
+      return
+    }
+    const loadSummary = async () => {
+      try {
+        const res = await fetch(`/api/waste-items?zona=${filters.zona}&limit=1000`)
+        if (res.ok) {
+          const { data, count } = await res.json()
+          const weight = data.reduce((sum: number, i: any) => sum + (i.weight || 0), 0)
+          const value = data.reduce((sum: number, i: any) => sum + (i.value || 0), 0)
+          setZoneSummary({ items: count, weight, value })
+        }
+      } catch {
+        setZoneSummary(null)
+      }
+    }
+    loadSummary()
+  }, [filters.zona, locations])
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col lg:flex-row gap-4">
       {/* Sidebar / Filter Panel */}
       <div className={`
-        lg:w-80 flex-shrink-0
+        lg:w-80 flex-shrink-0 overflow-y-auto
         ${showMobileFilters ? 'block' : 'hidden lg:block'}
       `}>
         <FilterPanel
           filters={filters}
           onFiltersChange={setFilters}
         />
+
+        {/* Zone Summary Cards */}
+        {filters.zona && (
+          <Card className="mt-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Resumen {getZoneLabel(filters.zona)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                  <Building2 className="h-4 w-4 text-blue-600" />
+                  <div>
+                    <p className="text-[10px] text-blue-600">Ubicaciones</p>
+                    <p className="text-sm font-bold text-blue-900">{locations?.length ?? 0}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg">
+                  <Package className="h-4 w-4 text-red-600" />
+                  <div>
+                    <p className="text-[10px] text-red-600">Items</p>
+                    <p className="text-sm font-bold text-red-900">{zoneSummary?.items ?? 0}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+                  <Weight className="h-4 w-4 text-slate-600" />
+                  <div>
+                    <p className="text-[10px] text-slate-600">Peso Total</p>
+                    <p className="text-sm font-bold text-slate-900">{(zoneSummary?.weight ?? 0).toLocaleString()} kg</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 bg-emerald-50 rounded-lg">
+                  <DollarSign className="h-4 w-4 text-emerald-600" />
+                  <div>
+                    <p className="text-[10px] text-emerald-600">Valor Total</p>
+                    <p className="text-sm font-bold text-emerald-900">${(zoneSummary?.value ?? 0).toLocaleString('es-PA', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Location Dropdown */}
         <Card className="mt-4">

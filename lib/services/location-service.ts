@@ -1,9 +1,11 @@
 import { supabase } from '@/lib/supabase/client'
+import { getCitiesForZone } from '@/lib/constants/zones'
 import type { Location, LocationWithDetails, WasteType, LocationDocument } from '@/types/database'
 
 export const locationService = {
   // List all locations with optional filters
   async getLocations(filters?: {
+    zona?: number
     ciudad?: string
     municipio?: string
     corregimiento?: string
@@ -18,6 +20,9 @@ export const locationService = {
       `)
       .order('created_at', { ascending: false })
 
+    if (filters?.zona) {
+      query = query.in('ciudad', getCitiesForZone(filters.zona))
+    }
     if (filters?.ciudad) {
       query = query.eq('ciudad', filters.ciudad)
     }

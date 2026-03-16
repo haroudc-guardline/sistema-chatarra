@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,12 +13,14 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Filter, X } from 'lucide-react'
+import { ZONES } from '@/lib/constants/zones'
 import type { WasteType } from '@/types/database'
 
 interface WasteItemFilters {
   search: string
   waste_type_id?: number
   quality?: string
+  zona?: number
 }
 
 interface WasteItemFilterPanelProps {
@@ -41,10 +42,11 @@ export function WasteItemFilterPanel({ wasteTypes, filters, onFiltersChange }: W
     filters.search,
     filters.waste_type_id,
     filters.quality,
+    filters.zona,
   ].filter(Boolean).length
 
   const handleReset = () => {
-    onFiltersChange({ search: '', waste_type_id: undefined, quality: undefined })
+    onFiltersChange({ search: '', waste_type_id: undefined, quality: undefined, zona: undefined })
   }
 
   return (
@@ -67,6 +69,29 @@ export function WasteItemFilterPanel({ wasteTypes, filters, onFiltersChange }: W
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Zone filter */}
+        <div className="space-y-2">
+          <Label className="text-xs text-slate-500">Zona</Label>
+          <Select
+            value={filters.zona?.toString() || 'all'}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, zona: value === 'all' ? undefined : parseInt(value) })
+            }
+          >
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="Todas las zonas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las zonas</SelectItem>
+              {ZONES.map((zone) => (
+                <SelectItem key={zone.id} value={zone.id.toString()}>
+                  {zone.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Search */}
         <div className="space-y-2">
           <Label className="text-xs text-slate-500">Buscar subcategoría</Label>

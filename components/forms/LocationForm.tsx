@@ -34,6 +34,7 @@ import { InlineWasteItemEditor, type PendingWasteItem } from '@/components/waste
 import { Loader2, MapPin, Search } from 'lucide-react'
 import type { Location, LocationWithDetails } from '@/types/database'
 import { locationService } from '@/lib/services/location-service'
+import { getZoneForCity } from '@/lib/constants/zones'
 
 const locationSchema = z.object({
   nombre_institucion: z.string().min(1, 'El nombre es requerido'),
@@ -191,6 +192,7 @@ export function LocationForm({ mode, initialData, initialExistingItems = [], onS
         volumen,
         peso_estimado,
         costo_valor,
+        zona: getZoneForCity(data.ciudad),
         corregimiento: data.corregimiento || undefined,
       } as Omit<Location, 'id' | 'created_at' | 'updated_at'>,
       wasteTypeIds,
