@@ -14,9 +14,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Bell, Menu, User, LogOut, Settings, Shield, Trash2, Leaf, HelpCircle } from 'lucide-react'
+import { Bell, Menu, User, LogOut, Settings, Shield, Trash2, Leaf } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { TutorialDialog } from '@/components/feedback/TutorialDialog'
 
 interface HeaderProps {
   onMenuToggle?: () => void
@@ -26,7 +25,6 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const [showTutorial, setShowTutorial] = useState(false)
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -105,17 +103,6 @@ export function Header({ onMenuToggle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Tutorial Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-slate-100 rounded-xl h-10 w-10"
-          onClick={() => setShowTutorial(true)}
-          title="Tutorial del sistema"
-        >
-          <HelpCircle className="h-5 w-5 text-slate-600" />
-        </Button>
-
         {/* Notification Bell */}
         <Button
           variant="ghost"
@@ -173,7 +160,6 @@ export function Header({ onMenuToggle }: HeaderProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <TutorialDialog open={showTutorial} onOpenChange={setShowTutorial} />
     </header>
   )
 }
