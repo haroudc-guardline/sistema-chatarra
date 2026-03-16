@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useLocations } from '@/hooks/useLocations'
 import { locationService } from '@/lib/services/location-service'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ZONES, getCitiesForZone } from '@/lib/constants/zones'
@@ -229,31 +231,38 @@ export function FilterPanel({ filters, onFiltersChange, className }: FilterPanel
           </Select>
         </div>
 
-        {/* Waste Types */}
-        <div className="space-y-2">
-          <Label>Tipos de Residuos</Label>
-          <div className="flex flex-wrap gap-2">
-            {wasteTypes?.map((type) => (
-              <Badge
-                key={type.id}
-                variant={
-                  localFilters.wasteTypeIds?.includes(type.id)
-                    ? 'default'
-                    : 'outline'
-                }
-                className={cn(
-                  'cursor-pointer transition-colors',
-                  localFilters.wasteTypeIds?.includes(type.id)
-                    ? 'bg-red-600 hover:bg-red-700'
-                    : 'hover:bg-slate-100'
+        {/* Waste Types - Collapsible multi-select */}
+        <Collapsible>
+          <div className="space-y-2">
+            <CollapsibleTrigger className="flex items-center justify-between w-full">
+              <Label className="cursor-pointer">Tipos de Residuos</Label>
+              <div className="flex items-center gap-1.5">
+                {(localFilters.wasteTypeIds?.length ?? 0) > 0 && (
+                  <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs">
+                    {localFilters.wasteTypeIds!.length}
+                  </Badge>
                 )}
-                onClick={() => toggleWasteType(type.id)}
-              >
-                {type.nombre}
-              </Badge>
-            ))}
+                <ChevronDown className="h-4 w-4 text-slate-400" />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-1 max-h-[200px] overflow-y-auto border rounded-lg p-2 bg-slate-50/50">
+                {wasteTypes?.map((type) => (
+                  <label
+                    key={type.id}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-100 cursor-pointer text-sm"
+                  >
+                    <Checkbox
+                      checked={localFilters.wasteTypeIds?.includes(type.id) ?? false}
+                      onCheckedChange={() => toggleWasteType(type.id)}
+                    />
+                    <span className="text-slate-700">{type.nombre}</span>
+                  </label>
+                ))}
+              </div>
+            </CollapsibleContent>
           </div>
-        </div>
+        </Collapsible>
 
         <Separator />
 

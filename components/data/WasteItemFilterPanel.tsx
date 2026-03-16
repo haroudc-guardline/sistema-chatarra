@@ -109,26 +109,24 @@ export function WasteItemFilterPanel({ wasteTypes, filters, onFiltersChange }: W
         {/* Waste Type filter */}
         <div className="space-y-2">
           <Label className="text-xs text-slate-500">Tipo de Residuo</Label>
-          <div className="flex flex-wrap gap-1.5">
-            {wasteTypes.map((type) => (
-              <button
-                key={type.id}
-                onClick={() => {
-                  onFiltersChange({
-                    ...filters,
-                    waste_type_id: filters.waste_type_id === type.id ? undefined : type.id,
-                  })
-                }}
-                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
-                  filters.waste_type_id === type.id
-                    ? 'bg-red-100 border-red-300 text-red-700'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                {type.nombre}
-              </button>
-            ))}
-          </div>
+          <Select
+            value={filters.waste_type_id?.toString() || 'all'}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, waste_type_id: value === 'all' ? undefined : parseInt(value) })
+            }
+          >
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="Todos los tipos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              {wasteTypes.map((type) => (
+                <SelectItem key={type.id} value={type.id.toString()}>
+                  {type.nombre}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Quality filter */}
