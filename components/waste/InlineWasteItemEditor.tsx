@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo, useRef } from 'react'
-import { WASTE_SUBCATEGORY_SUGGESTIONS } from '@/lib/constants/waste-subcategories'
+import { useState, useRef } from 'react'
+import { CreatableSubcategorySelect } from '@/components/waste/CreatableSubcategorySelect'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -76,13 +76,6 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
     value: '',
     quality: '',
   })
-
-  const subcategorySuggestions = useMemo(() => {
-    if (!newItem.waste_type_id) return []
-    const selectedType = wasteTypes.find(wt => wt.id === parseInt(newItem.waste_type_id))
-    if (!selectedType) return []
-    return WASTE_SUBCATEGORY_SUGGESTIONS[selectedType.nombre] || []
-  }, [newItem.waste_type_id, wasteTypes])
 
   // Totals from both existing + pending items
   const allItems = [
@@ -329,39 +322,12 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
 
             {/* Subcategoria */}
             <div className="space-y-2">
-              <Label htmlFor="inline-subcategoria">Subcategoría</Label>
-              <Input
-                id="inline-subcategoria"
-                list="inline-subcategoria-suggestions"
+              <Label>Subcategoría</Label>
+              <CreatableSubcategorySelect
+                wasteTypeId={newItem.waste_type_id ? parseInt(newItem.waste_type_id) : null}
                 value={newItem.subcategoria}
-                onChange={(e) => setNewItem({ ...newItem, subcategoria: e.target.value })}
-                placeholder={subcategorySuggestions.length > 0 ? `Ej: ${subcategorySuggestions[0]}` : 'Especifica el item (opcional)'}
+                onChange={(v) => setNewItem({ ...newItem, subcategoria: v })}
               />
-              {subcategorySuggestions.length > 0 && (
-                <datalist id="inline-subcategoria-suggestions">
-                  {subcategorySuggestions.map((s) => (
-                    <option key={s} value={s} />
-                  ))}
-                </datalist>
-              )}
-              {subcategorySuggestions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  {subcategorySuggestions.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setNewItem({ ...newItem, subcategoria: s })}
-                      className={`text-xs px-2 py-1 rounded-full border transition-colors ${
-                        newItem.subcategoria === s
-                          ? 'bg-blue-100 border-blue-300 text-blue-700'
-                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Volume and Weight */}

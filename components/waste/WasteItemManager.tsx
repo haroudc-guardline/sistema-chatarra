@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useWasteItems } from '@/hooks/useWasteItems'
 import { useAuth } from '@/hooks/useAuth'
 import { wasteItemService } from '@/lib/services/waste-item-service'
-import { WASTE_SUBCATEGORY_SUGGESTIONS } from '@/lib/constants/waste-subcategories'
+import { CreatableSubcategorySelect } from '@/components/waste/CreatableSubcategorySelect'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -88,14 +88,6 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
   const [photoCountMap, setPhotoCountMap] = useState<Record<number, number>>({})
   const galleryFileInputRef = useRef<HTMLInputElement>(null)
   const [isUploadingGalleryPhotos, setIsUploadingGalleryPhotos] = useState(false)
-
-  // Get subcategory suggestions based on selected waste type
-  const subcategorySuggestions = useMemo(() => {
-    if (!newItem.waste_type_id) return []
-    const selectedType = wasteTypes.find(wt => wt.id === parseInt(newItem.waste_type_id))
-    if (!selectedType) return []
-    return WASTE_SUBCATEGORY_SUGGESTIONS[selectedType.nombre] || []
-  }, [newItem.waste_type_id, wasteTypes])
 
   useEffect(() => {
     fetchWasteItems()
@@ -448,39 +440,12 @@ export function WasteItemManager({ locationId, wasteTypes }: WasteItemManagerPro
 
               {/* Subcategoria */}
               <div className="space-y-2">
-                <Label htmlFor="subcategoria">Subcategoría</Label>
-                <Input
-                  id="subcategoria"
-                  list="subcategoria-suggestions"
+                <Label>Subcategoría</Label>
+                <CreatableSubcategorySelect
+                  wasteTypeId={newItem.waste_type_id ? parseInt(newItem.waste_type_id) : null}
                   value={newItem.subcategoria}
-                  onChange={(e) => setNewItem({ ...newItem, subcategoria: e.target.value })}
-                  placeholder={subcategorySuggestions.length > 0 ? `Ej: ${subcategorySuggestions[0]}` : 'Especifica el item (opcional)'}
+                  onChange={(v) => setNewItem({ ...newItem, subcategoria: v })}
                 />
-                {subcategorySuggestions.length > 0 && (
-                  <datalist id="subcategoria-suggestions">
-                    {subcategorySuggestions.map((s) => (
-                      <option key={s} value={s} />
-                    ))}
-                  </datalist>
-                )}
-                {subcategorySuggestions.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {subcategorySuggestions.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setNewItem({ ...newItem, subcategoria: s })}
-                        className={`text-xs px-2 py-1 rounded-full border transition-colors ${
-                          newItem.subcategoria === s
-                            ? 'bg-blue-100 border-blue-300 text-blue-700'
-                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Volume and Weight */}
