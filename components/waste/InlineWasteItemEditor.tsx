@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Plus, Trash2, Package, Weight, DollarSign, Star, AlertCircle, X, ImageIcon } from 'lucide-react'
+import { Plus, Trash2, Pencil, Package, Weight, DollarSign, Star, AlertCircle, X, ImageIcon } from 'lucide-react'
 import type { WasteType } from '@/types/database'
 
 export interface PendingWasteItem {
@@ -65,6 +65,7 @@ function calculateValue(weightKg: number): number {
 
 export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingItems = [] }: InlineWasteItemEditorProps) {
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -97,6 +98,27 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
     })
   }
 
+  const handleEditItem = (index: number) => {
+    const item = items[index]
+    const subcatValue = item.subcategoria || ''
+    setNewItem({
+      waste_type_id: item.waste_type_id.toString(),
+      subcategoria: subcatValue,
+      volume: item.volume.toString(),
+      weight: item.weight.toString(),
+      value: item.value.toString(),
+      quality: item.quality || '',
+    })
+    setPendingFiles([...item.pendingPhotos])
+    setEditingIndex(index)
+    setShowAddDialog(true)
+    setError(null)
+    // Re-apply subcategory after CreatableSubcategorySelect's useEffect resets it
+    setTimeout(() => {
+      setNewItem(prev => ({ ...prev, subcategoria: subcatValue }))
+    }, 0)
+  }
+
   const handleAddItem = () => {
     setError(null)
 
@@ -126,8 +148,15 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
       waste_type_name: selectedType?.nombre || 'Sin tipo',
     }
 
-    onChange([...items, item])
+    if (editingIndex !== null) {
+      const updated = [...items]
+      updated[editingIndex] = item
+      onChange(updated)
+    } else {
+      onChange([...items, item])
+    }
     setShowAddDialog(false)
+    setEditingIndex(null)
     setNewItem({ waste_type_id: '', subcategoria: '', volume: '', weight: '', value: '', quality: '' })
     setPendingFiles([])
     setError(null)
@@ -238,15 +267,26 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
               <span className="text-[10px] text-slate-400">{item.pendingPhotos.length} foto(s)</span>
             )}
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => handleRemoveItem(index)}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEditItem(index)}
+              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 h-7 w-7 p-0"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => handleRemoveItem(index)}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 w-7 p-0"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       ))}
 
@@ -264,7 +304,13 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => setShowAddDialog(true)}
+        onClick={() => {
+          setEditingIndex(null)
+          setNewItem({ waste_type_id: '', subcategoria: '', volume: '', weight: '', value: '', quality: '' })
+          setPendingFiles([])
+          setError(null)
+          setShowAddDialog(true)
+        }}
         className="w-full"
       >
         <Plus className="mr-2 h-4 w-4" />
@@ -275,15 +321,18 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
       <Dialog open={showAddDialog} onOpenChange={(open) => {
         setShowAddDialog(open)
         if (!open) {
+          setEditingIndex(null)
           setPendingFiles([])
           setError(null)
         }
       }}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Agregar Item de Residuo</DialogTitle>
+            <DialogTitle>{editingIndex !== null ? 'Editar Item de Residuo' : 'Agregar Item de Residuo'}</DialogTitle>
             <DialogDescription>
-              Ingresa los detalles del nuevo item de residuo.
+              {editingIndex !== null
+                ? 'Modifica los detalles del item de residuo.'
+                : 'Ingresa los detalles del nuevo item de residuo.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -446,6 +495,7 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => {
               setShowAddDialog(false)
+              setEditingIndex(null)
               setError(null)
               setPendingFiles([])
             }}>
@@ -456,7 +506,7 @@ export function InlineWasteItemEditor({ wasteTypes, items, onChange, existingIte
               onClick={handleAddItem}
               className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
             >
-              Agregar Item
+              {editingIndex !== null ? 'Guardar Cambios' : 'Agregar Item'}
             </Button>
           </DialogFooter>
         </DialogContent>
