@@ -158,7 +158,6 @@ export default function DashboardPage() {
             value={totalLocations.toLocaleString('es-PA')}
             icon={Building2}
             description="Registradas en el sistema"
-            trend={{ value: 12, isPositive: true }}
             color="blue"
             isLoading={locationsLoading}
           />
@@ -167,7 +166,6 @@ export default function DashboardPage() {
             value={`${totalVolume.toLocaleString('es-PA')} m³`}
             icon={Package}
             description={`≈ ${(totalVolume * 0.001).toFixed(1)} millones de litros`}
-            trend={{ value: 8, isPositive: true }}
             color="emerald"
             isLoading={locationsLoading}
           />
@@ -176,7 +174,6 @@ export default function DashboardPage() {
             value={`${totalWeight.toLocaleString('es-PA')} kg`}
             icon={Weight}
             description={`≈ ${(totalWeight / 1000).toFixed(1)} toneladas`}
-            trend={{ value: 5, isPositive: true }}
             color="amber"
             isLoading={locationsLoading}
           />
@@ -185,7 +182,6 @@ export default function DashboardPage() {
             value={`$${totalValue.toLocaleString('es-PA')}`}
             icon={DollarSign}
             description="Costo estimado"
-            trend={{ value: 15, isPositive: true }}
             color="rose"
             isLoading={locationsLoading}
           />

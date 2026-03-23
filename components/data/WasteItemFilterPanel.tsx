@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -12,12 +11,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Filter, X } from 'lucide-react'
+import { Filter, X } from 'lucide-react'
 import { ZONES } from '@/lib/constants/zones'
+import { WASTE_SUBCATEGORY_SUGGESTIONS } from '@/lib/constants/waste-subcategories'
 import type { WasteType } from '@/types/database'
 
+// Flatten all subcategories into a unique sorted list
+const ALL_SUBCATEGORIES = Array.from(
+  new Set(Object.values(WASTE_SUBCATEGORY_SUGGESTIONS).flat())
+).sort((a, b) => a.localeCompare(b, 'es'))
+
 interface WasteItemFilters {
-  search: string
+  subcategoria?: string
   waste_type_id?: number
   quality?: string
   zona?: number
@@ -39,14 +44,14 @@ const QUALITY_OPTIONS = [
 
 export function WasteItemFilterPanel({ wasteTypes, filters, onFiltersChange }: WasteItemFilterPanelProps) {
   const activeFilterCount = [
-    filters.search,
+    filters.subcategoria,
     filters.waste_type_id,
     filters.quality,
     filters.zona,
   ].filter(Boolean).length
 
   const handleReset = () => {
-    onFiltersChange({ search: '', waste_type_id: undefined, quality: undefined, zona: undefined })
+    onFiltersChange({ subcategoria: undefined, waste_type_id: undefined, quality: undefined, zona: undefined })
   }
 
   return (
@@ -92,18 +97,27 @@ export function WasteItemFilterPanel({ wasteTypes, filters, onFiltersChange }: W
           </Select>
         </div>
 
-        {/* Search */}
+        {/* Subcategory filter */}
         <div className="space-y-2">
-          <Label className="text-xs text-slate-500">Buscar subcategoría</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input
-              placeholder="Ej: Computadora, Auto..."
-              value={filters.search}
-              onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
-              className="pl-9"
-            />
-          </div>
+          <Label className="text-xs text-slate-500">Subcategoría</Label>
+          <Select
+            value={filters.subcategoria || 'all'}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, subcategoria: value === 'all' ? undefined : value })
+            }
+          >
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="Todas las subcategorías" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las subcategorías</SelectItem>
+              {ALL_SUBCATEGORIES.map((sub) => (
+                <SelectItem key={sub} value={sub}>
+                  {sub}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Waste Type filter */}
