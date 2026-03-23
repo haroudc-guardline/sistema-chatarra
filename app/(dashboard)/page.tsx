@@ -165,7 +165,7 @@ export default function DashboardPage() {
             title="Volumen Total"
             value={`${totalVolume.toLocaleString('es-PA')} m³`}
             icon={Package}
-            description={`≈ ${(totalVolume * 0.001).toFixed(1)} millones de litros`}
+            description="Registrado en el sistema"
             color="emerald"
             isLoading={locationsLoading}
           />
