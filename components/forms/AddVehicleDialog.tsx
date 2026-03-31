@@ -37,7 +37,7 @@ const schema = z.object({
   ubicacion_direccion: z.string().optional(),
   ubicacion_municipio: z.string().optional(),
   ubicacion_parroquia: z.string().optional(),
-  estado: z.string().default('Activo'),
+  estado: z.string().min(1),
   notas: z.string().optional(),
 })
 
