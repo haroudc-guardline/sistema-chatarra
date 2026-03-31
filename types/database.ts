@@ -173,3 +173,94 @@ export interface SaleListingWithDetails extends SaleListing {
   items?: SaleListingItem[]
   inquiries?: SaleInquiry[]
 }
+
+export interface StockVehicle {
+  id: number
+  location_id: number
+  created_by?: string
+  marca: string
+  modelo: string
+  anio: number
+  placa: string
+  numero_motor?: string
+  numero_chasis?: string
+  color?: string
+  tipo_combustible?: string
+  tipo_vehiculo?: string
+  numero_poliza?: string
+  fecha_vencimiento_poliza?: string
+  fecha_revisado?: string
+  frecuencia_mantenimiento?: string
+  ubicacion_nombre?: string
+  ubicacion_direccion?: string
+  ubicacion_municipio?: string
+  ubicacion_parroquia?: string
+  estado: string
+  notas?: string
+  created_at: string
+  updated_at?: string
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+  photos?: StockItemPhoto[]
+}
+
+export interface StockAcUnit {
+  id: number
+  location_id: number
+  created_by?: string
+  marca: string
+  modelo: string
+  numero_serie?: string
+  capacidad_btu?: number
+  tipo_ac?: string
+  fecha_instalacion?: string
+  fecha_ultimo_mantenimiento?: string
+  frecuencia_mantenimiento?: string
+  ubicacion_nombre?: string
+  ubicacion_direccion?: string
+  ubicacion_municipio?: string
+  ubicacion_parroquia?: string
+  estado: string
+  notas?: string
+  created_at: string
+  updated_at?: string
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+  photos?: StockItemPhoto[]
+}
+
+export interface StockTool {
+  id: number
+  location_id: number
+  created_by?: string
+  nombre: string
+  marca?: string
+  modelo?: string
+  numero_serie?: string
+  tipo_herramienta?: string
+  voltaje?: string
+  potencia_watts?: number
+  fecha_adquisicion?: string
+  fecha_ultimo_mantenimiento?: string
+  frecuencia_mantenimiento?: string
+  ubicacion_nombre?: string
+  ubicacion_direccion?: string
+  ubicacion_municipio?: string
+  ubicacion_parroquia?: string
+  estado: string
+  notas?: string
+  created_at: string
+  updated_at?: string
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+  photos?: StockItemPhoto[]
+}
+
+export interface StockItemPhoto {
+  id: number
+  item_type: 'vehicle' | 'ac_unit' | 'tool'
+  item_id: number
+  file_name: string
+  file_path: string
+  file_size: number
+  uploaded_by?: string
+  created_at: string
+  public_url?: string
+}
