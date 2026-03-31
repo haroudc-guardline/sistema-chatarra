@@ -19,14 +19,14 @@ import { stockItemService } from '@/lib/services/stock-item-service'
 import type { Location, StockTool } from '@/types/database'
 
 const schema = z.object({
-  location_id: z.number({ coerce: true }).min(1, 'La institución es requerida'),
+  location_id: z.number().min(1, 'La institución es requerida'),
   nombre: z.string().min(1, 'El nombre es requerido'),
   marca: z.string().optional(),
   modelo: z.string().optional(),
   numero_serie: z.string().optional(),
   tipo_herramienta: z.string().optional(),
   voltaje: z.string().optional(),
-  potencia_watts: z.number({ coerce: true }).optional(),
+  potencia_watts: z.number().optional(),
   fecha_adquisicion: z.string().optional(),
   fecha_ultimo_mantenimiento: z.string().optional(),
   frecuencia_mantenimiento: z.string().optional(),
@@ -203,7 +203,7 @@ export function AddToolDialog({ open, onOpenChange, locations, onSuccess, editIt
             </div>
             <div className="space-y-2">
               <Label>Potencia (Watts)</Label>
-              <Input {...register('potencia_watts')} type="number" placeholder="750" />
+              <Input {...register('potencia_watts', { valueAsNumber: true })} type="number" placeholder="750" />
             </div>
           </div>
 

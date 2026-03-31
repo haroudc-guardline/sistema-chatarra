@@ -19,11 +19,11 @@ import { stockItemService } from '@/lib/services/stock-item-service'
 import type { Location, StockAcUnit } from '@/types/database'
 
 const schema = z.object({
-  location_id: z.number({ coerce: true }).min(1, 'La institución es requerida'),
+  location_id: z.number().min(1, 'La institución es requerida'),
   marca: z.string().min(1, 'La marca es requerida'),
   modelo: z.string().min(1, 'El modelo es requerido'),
   numero_serie: z.string().optional(),
-  capacidad_btu: z.number({ coerce: true }).optional(),
+  capacidad_btu: z.number().optional(),
   tipo_ac: z.string().optional(),
   fecha_instalacion: z.string().optional(),
   fecha_ultimo_mantenimiento: z.string().optional(),
@@ -177,7 +177,7 @@ export function AddAcUnitDialog({ open, onOpenChange, locations, onSuccess, edit
             </div>
             <div className="space-y-2">
               <Label>Capacidad (BTU)</Label>
-              <Input {...register('capacidad_btu')} type="number" placeholder="12000" />
+              <Input {...register('capacidad_btu', { valueAsNumber: true })} type="number" placeholder="12000" />
             </div>
             <div className="space-y-2">
               <Label>Tipo de A/C</Label>

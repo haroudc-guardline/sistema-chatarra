@@ -19,10 +19,10 @@ import { stockItemService } from '@/lib/services/stock-item-service'
 import type { Location, StockVehicle } from '@/types/database'
 
 const schema = z.object({
-  location_id: z.number({ coerce: true }).min(1, 'La institución es requerida'),
+  location_id: z.number().min(1, 'La institución es requerida'),
   marca: z.string().min(1, 'La marca es requerida'),
   modelo: z.string().min(1, 'El modelo es requerido'),
-  anio: z.coerce.number().min(1900).max(2100, 'Año inválido'),
+  anio: z.number().min(1900).max(2100, 'Año inválido'),
   placa: z.string().min(1, 'La placa es requerida'),
   numero_motor: z.string().optional(),
   numero_chasis: z.string().optional(),
@@ -182,7 +182,7 @@ export function AddVehicleDialog({ open, onOpenChange, locations, onSuccess, edi
             </div>
             <div className="space-y-2">
               <Label>Año <span className="text-red-500">*</span></Label>
-              <Input {...register('anio')} type="number" placeholder="2020" className={errors.anio ? 'border-red-500' : ''} />
+              <Input {...register('anio', { valueAsNumber: true })} type="number" placeholder="2020" className={errors.anio ? 'border-red-500' : ''} />
               {errors.anio && <p className="text-xs text-red-500">{errors.anio.message}</p>}
             </div>
           </div>
