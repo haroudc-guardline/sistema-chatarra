@@ -19,11 +19,11 @@ import { stockItemService } from '@/lib/services/stock-item-service'
 import type { Location, StockAcUnit } from '@/types/database'
 
 const schema = z.object({
-  location_id: z.coerce.number().min(1, 'La institución es requerida'),
+  location_id: z.number({ coerce: true }).min(1, 'La institución es requerida'),
   marca: z.string().min(1, 'La marca es requerida'),
   modelo: z.string().min(1, 'El modelo es requerido'),
   numero_serie: z.string().optional(),
-  capacidad_btu: z.coerce.number().optional(),
+  capacidad_btu: z.number({ coerce: true }).optional(),
   tipo_ac: z.string().optional(),
   fecha_instalacion: z.string().optional(),
   fecha_ultimo_mantenimiento: z.string().optional(),

@@ -19,7 +19,7 @@ import { stockItemService } from '@/lib/services/stock-item-service'
 import type { Location, StockVehicle } from '@/types/database'
 
 const schema = z.object({
-  location_id: z.coerce.number().min(1, 'La institución es requerida'),
+  location_id: z.number({ coerce: true }).min(1, 'La institución es requerida'),
   marca: z.string().min(1, 'La marca es requerida'),
   modelo: z.string().min(1, 'El modelo es requerido'),
   anio: z.coerce.number().min(1900).max(2100, 'Año inválido'),
