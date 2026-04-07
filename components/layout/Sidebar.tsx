@@ -25,7 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Leaf,
-  ShoppingCart,
+  ArrowUpFromLine,
   Package,
 } from 'lucide-react'
 
@@ -76,8 +76,8 @@ const navItems: NavItem[] = [
   },
   {
     href: '/sales',
-    label: 'Ventas',
-    icon: <ShoppingCart className="h-5 w-5" />,
+    label: 'Salidas',
+    icon: <ArrowUpFromLine className="h-5 w-5" />,
   },
 ]
 

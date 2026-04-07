@@ -318,3 +318,31 @@ export interface StockPart {
 export type VehiclePart = StockPart
 export type AcUnitPart = StockPart
 export type ToolPart = StockPart
+
+export type TipoSalida = 'Venta' | 'Donación' | 'Traspaso' | 'Permuta' | 'Subasta' | 'Descarte'
+
+export interface StockExit {
+  id: number
+  item_type: 'vehicle' | 'ac_unit' | 'tool'
+  item_id: number
+  location_id: number
+  tipo_salida: TipoSalida
+  valor_venta?: number
+  descripcion?: string
+  fecha_salida: string
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
+  created_by?: string
+  created_at: string
+  updated_at?: string
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+  // Populated from joined stock item
+  item_detail?: {
+    marca: string
+    modelo: string
+    placa?: string
+    numero_serie?: string
+    tipo_activo?: string
+  }
+}
