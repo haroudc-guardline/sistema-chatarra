@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     if (!itemType || !itemId) {
       return NextResponse.json({ error: 'item_type y item_id son requeridos' }, { status: 400 })
     }
-    if (!['vehicle', 'ac_unit', 'tool'].includes(itemType)) {
+    if (!['vehicle', 'ac_unit', 'tool', 'inmueble'].includes(itemType)) {
       return NextResponse.json({ error: 'item_type inválido' }, { status: 400 })
     }
 

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
-import { Car, Wind, Wrench, ArrowRight } from 'lucide-react'
+import { Car, Wind, Wrench, Building, ArrowRight } from 'lucide-react'
 
 const CATEGORIES = [
   {
@@ -36,6 +36,16 @@ const CATEGORIES = [
     blur1: 'bg-white/10',
     blur2: 'bg-orange-400/20',
   },
+  {
+    href: '/inventory/stock/inmuebles',
+    icon: Building,
+    title: 'Inmuebles',
+    description: 'Gestión de propiedades e inmuebles institucionales',
+    gradient: 'from-purple-600/90 via-purple-700/85 to-indigo-900/90',
+    bgImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop',
+    blur1: 'bg-white/10',
+    blur2: 'bg-purple-400/20',
+  },
 ]
 
 export default function StockLandingPage() {
@@ -50,7 +60,7 @@ export default function StockLandingPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
         {CATEGORIES.map(({ href, icon: Icon, title, description, gradient, bgImage, blur1, blur2 }) => (
           <Link key={href} href={href} className="group">
             <Card className="relative overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-full group-hover:-translate-y-1">

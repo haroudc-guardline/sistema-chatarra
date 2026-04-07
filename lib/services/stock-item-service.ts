@@ -177,7 +177,7 @@ export const stockItemService = {
   },
 
   // Photos
-  async uploadPhotos(itemType: 'vehicle' | 'ac_unit' | 'tool', itemId: number, files: File[]): Promise<StockItemPhoto[]> {
+  async uploadPhotos(itemType: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble', itemId: number, files: File[]): Promise<StockItemPhoto[]> {
     const formData = new FormData()
     formData.append('item_type', itemType)
     formData.append('item_id', itemId.toString())

@@ -34,6 +34,7 @@ const schema = z.object({
   ubicacion_nombre: z.string().optional(),
   ubicacion_direccion: z.string().optional(),
   ubicacion_municipio: z.string().optional(),
+  codigo_marbete: z.string().optional(),
   notas: z.string().optional(),
 })
 
@@ -89,6 +90,7 @@ export function AddPartDialog({
           ubicacion_nombre: editItem.ubicacion_nombre || '',
           ubicacion_direccion: editItem.ubicacion_direccion || '',
           ubicacion_municipio: editItem.ubicacion_municipio || '',
+          codigo_marbete: editItem.codigo_marbete || '',
           notas: editItem.notas || '',
         }
       : {
@@ -114,6 +116,7 @@ export function AddPartDialog({
           ubicacion_nombre: editItem.ubicacion_nombre || '',
           ubicacion_direccion: editItem.ubicacion_direccion || '',
           ubicacion_municipio: editItem.ubicacion_municipio || '',
+          codigo_marbete: editItem.codigo_marbete || '',
           notas: editItem.notas || '',
         })
       } else {
@@ -347,6 +350,12 @@ export function AddPartDialog({
                 <Input {...register('ubicacion_municipio')} placeholder="Panamá" />
               </div>
             </div>
+          </div>
+
+          {/* Código de Marbete */}
+          <div className="space-y-2">
+            <Label>Código de Marbete</Label>
+            <Input {...register('codigo_marbete')} placeholder="Ej: MRB-2026-001" />
           </div>
 
           {/* Notas */}

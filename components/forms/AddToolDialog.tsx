@@ -34,6 +34,7 @@ const schema = z.object({
   ubicacion_direccion: z.string().optional(),
   ubicacion_municipio: z.string().optional(),
   ubicacion_parroquia: z.string().optional(),
+  codigo_marbete: z.string().optional(),
   estado: z.string().min(1),
   notas: z.string().optional(),
 })
@@ -75,6 +76,7 @@ export function AddToolDialog({ open, onOpenChange, locations, onSuccess, editIt
           ubicacion_direccion: editItem.ubicacion_direccion || '',
           ubicacion_municipio: editItem.ubicacion_municipio || '',
           ubicacion_parroquia: editItem.ubicacion_parroquia || '',
+          codigo_marbete: editItem.codigo_marbete || '',
           estado: editItem.estado,
           notas: editItem.notas || '',
         }
@@ -251,6 +253,12 @@ export function AddToolDialog({ open, onOpenChange, locations, onSuccess, editIt
                 <Input {...register('ubicacion_parroquia')} placeholder="Betania" />
               </div>
             </div>
+          </div>
+
+          {/* Código de Marbete */}
+          <div className="space-y-2">
+            <Label>Código de Marbete</Label>
+            <Input {...register('codigo_marbete')} placeholder="Ej: MRB-2026-001" />
           </div>
 
           {/* Estado */}

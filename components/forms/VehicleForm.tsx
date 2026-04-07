@@ -37,6 +37,7 @@ const schema = z.object({
   ubicacion_parroquia: z.string().optional(),
   tipo_activo: z.string().optional(),
   valor: z.number().optional(),
+  codigo_marbete: z.string().optional(),
   tiene_avaluo: z.boolean().optional(),
   precio_avaluo: z.number().optional(),
   responsable_nombre: z.string().optional(),
@@ -87,6 +88,7 @@ export function VehicleForm({ locations, onSubmit, onCancel, editItem, isSubmitt
           ubicacion_parroquia: editItem.ubicacion_parroquia || '',
           tipo_activo: editItem.tipo_activo || '',
           valor: editItem.valor ?? undefined,
+          codigo_marbete: editItem.codigo_marbete || '',
           tiene_avaluo: editItem.tiene_avaluo ?? false,
           precio_avaluo: editItem.precio_avaluo ?? undefined,
           responsable_nombre: editItem.responsable_nombre || '',
@@ -319,6 +321,10 @@ export function VehicleForm({ locations, onSubmit, onCancel, editItem, isSubmitt
                   step="0.01"
                   placeholder="$0.00"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>Código de Marbete</Label>
+                <Input {...register('codigo_marbete')} placeholder="Ej: MRB-2026-001" />
               </div>
 
               {watchedValues.tipo_activo === 'Activo usado' && (

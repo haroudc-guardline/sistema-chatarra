@@ -1,0 +1,2 @@
+-- Inmueble types, activo types, stock_inmuebles table, marbete field
+-- See plan for full details. Applied via Supabase MCP.

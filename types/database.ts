@@ -199,6 +199,7 @@ export interface StockVehicle {
   responsable_nombre?: string
   responsable_telefono?: string
   responsable_email?: string
+  codigo_marbete?: string
   estado: string
   notas?: string
   created_at: string
@@ -230,6 +231,7 @@ export interface StockAcUnit {
   responsable_nombre?: string
   responsable_telefono?: string
   responsable_email?: string
+  codigo_marbete?: string
   estado: string
   notas?: string
   created_at: string
@@ -263,6 +265,7 @@ export interface StockTool {
   responsable_nombre?: string
   responsable_telefono?: string
   responsable_email?: string
+  codigo_marbete?: string
   estado: string
   notas?: string
   created_at: string
@@ -273,7 +276,7 @@ export interface StockTool {
 
 export interface StockItemPhoto {
   id: number
-  item_type: 'vehicle' | 'ac_unit' | 'tool'
+  item_type: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble'
   item_id: number
   file_name: string
   file_path: string
@@ -307,6 +310,7 @@ export interface StockPart {
   ubicacion_nombre?: string
   ubicacion_direccion?: string
   ubicacion_municipio?: string
+  codigo_marbete?: string
   notas?: string
   created_by?: string
   created_at: string
@@ -323,7 +327,7 @@ export type TipoSalida = 'Venta' | 'Donación' | 'Traspaso' | 'Permuta' | 'Subas
 
 export interface StockExit {
   id: number
-  item_type: 'vehicle' | 'ac_unit' | 'tool'
+  item_type: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble'
   item_id: number
   location_id: number
   tipo_salida: TipoSalida
@@ -345,4 +349,48 @@ export interface StockExit {
     numero_serie?: string
     tipo_activo?: string
   }
+}
+
+export interface InmuebleType {
+  id: number
+  nombre: string
+  created_by_user: boolean
+  created_at: string
+}
+
+export interface InmuebleActivoType {
+  id: number
+  nombre: string
+  created_by_user: boolean
+  created_at: string
+}
+
+export interface StockInmueble {
+  id: number
+  location_id: number
+  created_by?: string
+  nombre: string
+  inmueble_type_id: number
+  activo_type_id?: number
+  valor?: number
+  metros_cuadrados?: number
+  avaluo?: string
+  registro?: string
+  planos_actualizados?: string
+  codigo_marbete?: string
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
+  ubicacion_nombre?: string
+  ubicacion_direccion?: string
+  ubicacion_municipio?: string
+  ubicacion_ciudad?: string
+  estado: string
+  notas?: string
+  created_at: string
+  updated_at?: string
+  inmueble_type?: InmuebleType
+  activo_type?: InmuebleActivoType
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+  photos?: StockItemPhoto[]
 }
