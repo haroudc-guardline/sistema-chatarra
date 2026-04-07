@@ -17,6 +17,7 @@ import {
 import { Loader2, Plus, Check, X } from 'lucide-react'
 import { usePartTypes, usePartTypeMutations } from '@/hooks/useParts'
 import { partsService } from '@/lib/services/parts-service'
+import { InstitutionSelect } from './InstitutionSelect'
 import type { PartCategory, Location, StockPart } from '@/types/database'
 
 const ESTADO_OPTIONS = ['Disponible', 'En uso', 'Dañada', 'Dado de baja'] as const
@@ -253,19 +254,12 @@ export function AddPartDialog({
           {/* Institución */}
           <div className="space-y-2">
             <Label>Institución <span className="text-red-500">*</span></Label>
-            <Select
-              value={watchedValues.location_id?.toString() || ''}
-              onValueChange={(v) => setValue('location_id', parseInt(v))}
-            >
-              <SelectTrigger className={errors.location_id ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Seleccionar institución" />
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map((l) => (
-                  <SelectItem key={l.id} value={l.id.toString()}>{l.nombre_institucion}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <InstitutionSelect
+              value={watchedValues.location_id}
+              onChange={(id) => setValue('location_id', id)}
+              error={!!errors.location_id}
+              locations={locations}
+            />
             {errors.location_id && <p className="text-xs text-red-500">{errors.location_id.message}</p>}
           </div>
 

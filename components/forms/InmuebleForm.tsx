@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'
+import { InstitutionSelect } from './InstitutionSelect'
 import { PlacesAutocomplete } from '@/components/map/PlacesAutocomplete'
 import { useLocations } from '@/hooks/useLocations'
 import { locationService } from '@/lib/services/location-service'
@@ -225,20 +226,13 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
               </div>
 
               <div className="space-y-2">
-                <Label>Institucion <span className="text-red-500">*</span></Label>
-                <Select
-                  value={watchedValues.location_id?.toString() || ''}
-                  onValueChange={(v) => setValue('location_id', parseInt(v))}
-                >
-                  <SelectTrigger className={errors.location_id ? 'border-red-500' : ''}>
-                    <SelectValue placeholder="Seleccionar institucion" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locations.map((l) => (
-                      <SelectItem key={l.id} value={l.id.toString()}>{l.nombre_institucion}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Institución <span className="text-red-500">*</span></Label>
+                <InstitutionSelect
+                  value={watchedValues.location_id}
+                  onChange={(id) => setValue('location_id', id)}
+                  error={!!errors.location_id}
+                  locations={locations}
+                />
                 {errors.location_id && <p className="text-xs text-red-500">{errors.location_id.message}</p>}
               </div>
 
