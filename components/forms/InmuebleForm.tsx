@@ -139,6 +139,8 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
     const cleaned = Object.fromEntries(
       Object.entries(data).map(([k, v]) => [k, v === '' ? undefined : v])
     )
+    // Ensure estado always has a value
+    if (!cleaned.estado) cleaned.estado = 'Activo'
     await onSubmit(cleaned, pendingFiles)
   }
 
