@@ -192,6 +192,13 @@ export interface StockVehicle {
   ubicacion_direccion?: string
   ubicacion_municipio?: string
   ubicacion_parroquia?: string
+  tipo_activo?: string
+  valor?: number
+  tiene_avaluo?: boolean
+  precio_avaluo?: number
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
   estado: string
   notas?: string
   created_at: string
@@ -216,6 +223,13 @@ export interface StockAcUnit {
   ubicacion_direccion?: string
   ubicacion_municipio?: string
   ubicacion_parroquia?: string
+  tipo_activo?: string
+  valor?: number
+  tiene_avaluo?: boolean
+  precio_avaluo?: number
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
   estado: string
   notas?: string
   created_at: string
@@ -242,6 +256,13 @@ export interface StockTool {
   ubicacion_direccion?: string
   ubicacion_municipio?: string
   ubicacion_parroquia?: string
+  tipo_activo?: string
+  valor?: number
+  tiene_avaluo?: boolean
+  precio_avaluo?: number
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
   estado: string
   notas?: string
   created_at: string
@@ -261,3 +282,39 @@ export interface StockItemPhoto {
   created_at: string
   public_url?: string
 }
+
+export type PartCategory = 'vehicle' | 'ac_unit' | 'tool'
+
+export interface PartType {
+  id: number
+  category: PartCategory
+  nombre: string
+  created_by_user: boolean
+  created_at: string
+}
+
+export interface StockPart {
+  id: number
+  part_type_id: number
+  location_id: number
+  marca?: string
+  modelo?: string
+  cantidad: number
+  estado: string
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
+  ubicacion_nombre?: string
+  ubicacion_direccion?: string
+  ubicacion_municipio?: string
+  notas?: string
+  created_by?: string
+  created_at: string
+  updated_at?: string
+  part_type?: PartType
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+}
+
+export type VehiclePart = StockPart
+export type AcUnitPart = StockPart
+export type ToolPart = StockPart

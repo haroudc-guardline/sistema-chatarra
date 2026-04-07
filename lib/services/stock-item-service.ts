@@ -7,6 +7,8 @@ export interface VehicleSearchFilters {
   estado?: string
   tipo_vehiculo?: string
   tipo_combustible?: string
+  tipo_activo?: string
+  nombre_institucion?: string
   search?: string
   municipio?: string
   page?: number
@@ -17,6 +19,8 @@ export interface AcUnitSearchFilters {
   location_id?: number
   estado?: string
   tipo_ac?: string
+  tipo_activo?: string
+  nombre_institucion?: string
   search?: string
   municipio?: string
   page?: number
@@ -27,6 +31,8 @@ export interface ToolSearchFilters {
   location_id?: number
   estado?: string
   tipo_herramienta?: string
+  tipo_activo?: string
+  nombre_institucion?: string
   search?: string
   municipio?: string
   page?: number

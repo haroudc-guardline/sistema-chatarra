@@ -42,11 +42,11 @@ export default function StockLandingPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Materiales en Stock"
+        title="Inventario General en Stock"
         description="Selecciona la categoría de inventario activo que deseas gestionar"
         breadcrumbs={[
           { label: 'Inventario', href: '/inventory' },
-          { label: 'Materiales en Stock' },
+          { label: 'Inventario General en Stock' },
         ]}
       />
 

@@ -6,13 +6,15 @@ import { useLocations } from '@/hooks/useLocations'
 import { useAuth } from '@/hooks/useAuth'
 import { StockFilterPanel, type StockFilters } from '@/components/data/StockFilterPanel'
 import { AddAcUnitDialog } from '@/components/forms/AddAcUnitDialog'
+import { BancoPiezasTable } from '@/components/stock/BancoPiezasTable'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Wind, Plus, Loader2, MapPin, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
-  Wrench, Calendar,
+  Wrench, Calendar, FileText,
 } from 'lucide-react'
 import type { StockAcUnit } from '@/types/database'
 
@@ -30,6 +32,7 @@ export default function AiresPage() {
   const { locations } = useLocations()
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<StockFilters>({})
+  const [activeTab, setActiveTab] = useState('stock')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editItem, setEditItem] = useState<StockAcUnit | undefined>()
 
@@ -83,11 +86,11 @@ export default function AiresPage() {
         description="Gestión de equipos de climatización en stock activo"
         breadcrumbs={[
           { label: 'Inventario', href: '/inventory' },
-          { label: 'Materiales en Stock', href: '/inventory/stock' },
+          { label: 'Inventario General en Stock', href: '/inventory/stock' },
           { label: 'Aires Acondicionados' },
         ]}
         actions={
-          (isAdmin || isOperador) ? [
+          (isAdmin || isOperador) && activeTab === 'stock' ? [
             {
               label: 'Agregar A/C',
               icon: Plus,
@@ -97,6 +100,15 @@ export default function AiresPage() {
           ] : undefined
         }
       />
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="stock">A/C en Stock</TabsTrigger>
+          <TabsTrigger value="piezas">Banco de Piezas</TabsTrigger>
+          <TabsTrigger value="traspaso">Formulario de Traspaso</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="stock">
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -230,6 +242,23 @@ export default function AiresPage() {
           </Card>
         </div>
       </div>
+
+        </TabsContent>
+
+        <TabsContent value="piezas">
+          <BancoPiezasTable category="ac_unit" locations={locations || []} />
+        </TabsContent>
+
+        <TabsContent value="traspaso">
+          <Card>
+            <CardContent className="py-16 text-center">
+              <FileText className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+              <p className="text-slate-500 font-medium">Formulario de Traspaso de Piezas</p>
+              <p className="text-sm text-slate-400 mt-1">Próximamente — En espera de definición del formulario</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <AddAcUnitDialog
         open={dialogOpen}

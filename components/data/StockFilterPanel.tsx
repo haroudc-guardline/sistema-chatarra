@@ -21,6 +21,8 @@ export interface StockFilters {
   tipo_vehiculo?: string
   tipo_ac?: string
   tipo_herramienta?: string
+  tipo_activo?: string
+  nombre_institucion?: string
 }
 
 interface StockFilterPanelProps {
@@ -35,6 +37,7 @@ const AC_TIPOS = ['Split', 'Central', 'Ventana', 'Portátil', 'Mini Split', 'Otr
 const TOOL_TIPOS = ['Taladro', 'Sierra', 'Esmeriladora', 'Compresor', 'Soldadora', 'Lijadora', 'Generador', 'Otro']
 const VEHICLE_ESTADOS = ['Activo', 'En reparación', 'Fuera de servicio', 'Dado de baja']
 const OTROS_ESTADOS = ['Operativo', 'En reparación', 'Fuera de servicio', 'Dado de baja']
+const TIPO_ACTIVO_OPTIONS = ['Activo nuevo', 'Activo usado', 'Activo por Permuta y Donación']
 
 export function StockFilterPanel({ category, filters, municipios, onFiltersChange }: StockFilterPanelProps) {
   const activeCount = Object.values(filters).filter(Boolean).length
@@ -143,6 +146,36 @@ export function StockFilterPanel({ category, filters, municipios, onFiltersChang
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Tipo de Activo */}
+        <div className="space-y-2">
+          <Label className="text-xs text-slate-500">Tipo de Activo</Label>
+          <Select
+            value={filters.tipo_activo || 'all'}
+            onValueChange={(v) => onFiltersChange({ ...filters, tipo_activo: v === 'all' ? undefined : v })}
+          >
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="Todos los activos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los activos</SelectItem>
+              {TIPO_ACTIVO_OPTIONS.map((t) => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Nombre Institución */}
+        <div className="space-y-2">
+          <Label className="text-xs text-slate-500">Institución</Label>
+          <Input
+            placeholder="Buscar institución..."
+            value={filters.nombre_institucion || ''}
+            onChange={(e) => onFiltersChange({ ...filters, nombre_institucion: e.target.value || undefined })}
+            className="text-sm"
+          />
         </div>
       </CardContent>
     </Card>

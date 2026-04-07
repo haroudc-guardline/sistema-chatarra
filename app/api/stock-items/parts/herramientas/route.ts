@@ -16,11 +16,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
 
   const locationId = searchParams.get('location_id')
+  const partTypeId = searchParams.get('part_type_id')
   const estado = searchParams.get('estado')
-  const tipoVehiculo = searchParams.get('tipo_vehiculo')
-  const tipoCombustible = searchParams.get('tipo_combustible')
-  const tipoActivo = searchParams.get('tipo_activo')
-  const nombreInstitucion = searchParams.get('nombre_institucion')
   const search = searchParams.get('search')
   const municipio = searchParams.get('municipio')
   const page = parseInt(searchParams.get('page') || '1')
@@ -28,21 +25,16 @@ export async function GET(request: Request) {
   const offset = (page - 1) * limit
 
   let query = supabase
-    .from('stock_vehicles')
-    .select('*, location:locations(id, nombre_institucion, ciudad, municipio)', { count: 'exact' })
+    .from('tool_parts')
+    .select('*, part_type:part_types(id, category, nombre, created_by_user, created_at), location:locations(id, nombre_institucion, ciudad, municipio)', { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (locationId) query = query.eq('location_id', parseInt(locationId))
+  if (partTypeId) query = query.eq('part_type_id', parseInt(partTypeId))
   if (estado) query = query.eq('estado', estado)
-  if (tipoVehiculo) query = query.eq('tipo_vehiculo', tipoVehiculo)
-  if (tipoCombustible) query = query.eq('tipo_combustible', tipoCombustible)
-  if (tipoActivo) query = query.eq('tipo_activo', tipoActivo)
-  if (search) query = query.or(`marca.ilike.%${search}%,modelo.ilike.%${search}%,placa.ilike.%${search}%`)
-  if (municipio || nombreInstitucion) {
-    let locQuery = supabase.from('locations').select('id')
-    if (municipio) locQuery = locQuery.eq('municipio', municipio)
-    if (nombreInstitucion) locQuery = locQuery.ilike('nombre_institucion', `%${nombreInstitucion}%`)
-    const { data: locs } = await locQuery
+  if (search) query = query.or(`marca.ilike.%${search}%,modelo.ilike.%${search}%`)
+  if (municipio) {
+    const { data: locs } = await supabase.from('locations').select('id').eq('municipio', municipio)
     if (locs?.length) {
       query = query.in('location_id', locs.map((l) => l.id))
     } else {
@@ -54,7 +46,7 @@ export async function GET(request: Request) {
   const { data, error, count } = await query
 
   if (error) {
-    console.error('Error fetching vehicles:', error)
+    console.error('Error fetching tool parts:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -75,20 +67,17 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
+    if (!body.part_type_id) return NextResponse.json({ error: 'El tipo de pieza es requerido' }, { status: 400 })
     if (!body.location_id) return NextResponse.json({ error: 'La institución es requerida' }, { status: 400 })
-    if (!body.marca) return NextResponse.json({ error: 'La marca es requerida' }, { status: 400 })
-    if (!body.modelo) return NextResponse.json({ error: 'El modelo es requerido' }, { status: 400 })
-    if (!body.anio) return NextResponse.json({ error: 'El año es requerido' }, { status: 400 })
-    if (!body.placa) return NextResponse.json({ error: 'La placa es requerida' }, { status: 400 })
 
     const { data: inserted, error: insertError } = await supabase
-      .from('stock_vehicles')
+      .from('tool_parts')
       .insert({ ...body, created_by: user.id })
-      .select('*, location:locations(id, nombre_institucion, ciudad, municipio)')
+      .select('*, part_type:part_types(id, category, nombre, created_by_user, created_at), location:locations(id, nombre_institucion, ciudad, municipio)')
       .single()
 
     if (insertError) {
-      console.error('Error creating vehicle:', insertError)
+      console.error('Error creating tool part:', insertError)
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 

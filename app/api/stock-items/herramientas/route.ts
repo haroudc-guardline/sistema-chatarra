@@ -18,6 +18,8 @@ export async function GET(request: Request) {
   const locationId = searchParams.get('location_id')
   const estado = searchParams.get('estado')
   const tipoHerramienta = searchParams.get('tipo_herramienta')
+  const tipoActivo = searchParams.get('tipo_activo')
+  const nombreInstitucion = searchParams.get('nombre_institucion')
   const search = searchParams.get('search')
   const municipio = searchParams.get('municipio')
   const page = parseInt(searchParams.get('page') || '1')
@@ -32,9 +34,13 @@ export async function GET(request: Request) {
   if (locationId) query = query.eq('location_id', parseInt(locationId))
   if (estado) query = query.eq('estado', estado)
   if (tipoHerramienta) query = query.eq('tipo_herramienta', tipoHerramienta)
+  if (tipoActivo) query = query.eq('tipo_activo', tipoActivo)
   if (search) query = query.or(`nombre.ilike.%${search}%,marca.ilike.%${search}%,modelo.ilike.%${search}%`)
-  if (municipio) {
-    const { data: locs } = await supabase.from('locations').select('id').eq('municipio', municipio)
+  if (municipio || nombreInstitucion) {
+    let locQuery = supabase.from('locations').select('id')
+    if (municipio) locQuery = locQuery.eq('municipio', municipio)
+    if (nombreInstitucion) locQuery = locQuery.ilike('nombre_institucion', `%${nombreInstitucion}%`)
+    const { data: locs } = await locQuery
     if (locs?.length) {
       query = query.in('location_id', locs.map((l) => l.id))
     } else {
