@@ -42,7 +42,7 @@ export default function InventoryLandingPage() {
               <div className="h-20 w-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl border border-white/30">
                 <Trash2 className="h-10 w-10 text-white" />
               </div>
-              <h3 className="font-bold text-2xl mb-3">Materiales de Descarte</h3>
+              <h3 className="font-bold text-2xl mb-3">Inventario de Descarte</h3>
               <p className="text-red-100 text-sm leading-relaxed mb-8">
                 Inventario de materiales descartados por las instituciones del sistema
               </p>
@@ -77,7 +77,7 @@ export default function InventoryLandingPage() {
               <div className="h-20 w-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl border border-white/30">
                 <Warehouse className="h-10 w-10 text-white" />
               </div>
-              <h3 className="font-bold text-2xl mb-3">Materiales en Stock</h3>
+              <h3 className="font-bold text-2xl mb-3">Inventario General en Stock</h3>
               <p className="text-blue-100 text-sm leading-relaxed mb-8">
                 Gestión de materiales disponibles en inventario activo
               </p>

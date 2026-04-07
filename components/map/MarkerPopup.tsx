@@ -1,7 +1,7 @@
 import type { LocationWithDetails } from '@/types/database'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { MapPin, Package, Weight, DollarSign } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 
 interface MarkerPopupProps {
   location: LocationWithDetails
@@ -12,8 +12,8 @@ export function MarkerPopup({ location }: MarkerPopupProps) {
     <Card className="w-full max-w-sm">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
-            <MapPin className="h-5 w-5 text-red-700" />
+          <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <MapPin className="h-5 w-5 text-blue-700" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-slate-900 truncate">
@@ -25,28 +25,11 @@ export function MarkerPopup({ location }: MarkerPopupProps) {
           </div>
         </div>
 
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500 flex items-center gap-1">
-              <Package className="h-4 w-4" />
-              Volumen:
-            </span>
-            <span className="font-medium">{location.volumen} m³</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500 flex items-center gap-1">
-              <Weight className="h-4 w-4" />
-              Peso:
-            </span>
-            <span className="font-medium">{location.peso_estimado} kg</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-500 flex items-center gap-1">
-              <DollarSign className="h-4 w-4" />
-              Valor:
-            </span>
-            <span className="font-medium">${location.costo_valor}</span>
-          </div>
+        <div className="mt-3 text-sm text-slate-600">
+          <p>{location.ciudad} — {location.municipio}</p>
+          {location.nombre_responsable && (
+            <p className="mt-1 text-slate-500">Responsable: {location.nombre_responsable}</p>
+          )}
         </div>
 
         {location.waste_types && location.waste_types.length > 0 && (
@@ -59,7 +42,7 @@ export function MarkerPopup({ location }: MarkerPopupProps) {
                 <Badge
                   key={wt.id}
                   variant="secondary"
-                  className="text-xs bg-red-100 text-red-800"
+                  className="text-xs bg-blue-100 text-blue-800"
                 >
                   {wt.nombre}
                 </Badge>
@@ -70,7 +53,7 @@ export function MarkerPopup({ location }: MarkerPopupProps) {
 
         <a
           href={`/locations/${location.id}`}
-          className="mt-4 block w-full text-center py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+          className="mt-4 block w-full text-center py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
         >
           Ver Detalles
         </a>

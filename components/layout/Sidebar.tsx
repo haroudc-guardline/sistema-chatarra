@@ -22,7 +22,6 @@ import {
   FileText,
   Upload,
   Menu,
-  Trash2,
   ChevronLeft,
   ChevronRight,
   Leaf,
@@ -108,15 +107,15 @@ function SidebarContent({
         )}>
           <Link href="/" className="flex items-center gap-3" onClick={onItemClick}>
             <div className="relative">
-              <div className="absolute inset-0 bg-red-500/20 blur-lg rounded-full" />
-              <div className="relative h-10 w-10 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/20">
-                <Trash2 className="h-5 w-5 text-white" />
+              <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-full" />
+              <div className="relative h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
+                <Building2 className="h-5 w-5 text-white" />
               </div>
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-white whitespace-nowrap leading-tight">
-                  Residuos PA
+                  Bienes Patrimoniales
                 </span>
                 <span className="text-[10px] text-slate-400 whitespace-nowrap">
                   Sistema Nacional
@@ -140,7 +139,7 @@ function SidebarContent({
                     'flex items-center rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
                     isCollapsed ? 'justify-center py-3' : 'gap-3 px-3 py-2.5',
                     isActive
-                      ? 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg shadow-red-600/20'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/20'
                       : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                   )}
                 >
@@ -196,7 +195,7 @@ function SidebarContent({
           {!isCollapsed && (
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <Leaf className="h-3 w-3 text-emerald-500" />
-              <span>© 2026 Residuos Panamá</span>
+              <span>© 2026 Bienes Patrimoniales PA</span>
             </div>
           )}
         </div>

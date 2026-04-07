@@ -35,7 +35,7 @@ import {
 const TUTORIAL_STEPS = [
   {
     icon: <Trash2 className="h-10 w-10 text-red-600" />,
-    title: 'Bienvenido al Sistema de Gestión de Residuos',
+    title: 'Bienvenido al Sistema de Inventario Nacional de Bienes Patrimoniales',
     description:
       'Este sistema te permite registrar, gestionar y dar seguimiento a los residuos y chatarra en instituciones a nivel nacional. Navega por las diferentes secciones usando el menú lateral.',
   },

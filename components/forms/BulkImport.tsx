@@ -31,9 +31,6 @@ interface ImportRow {
   corregimiento?: string
   latitud: number
   longitud: number
-  volumen: number
-  peso_estimado: number
-  costo_valor: number
   contacto_responsable: string
   nombre_responsable: string
   tipos_residuos: string
@@ -66,9 +63,6 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
     'municipio',
     'latitud',
     'longitud',
-    'volumen',
-    'peso_estimado',
-    'costo_valor',
     'contacto_responsable',
     'nombre_responsable',
     'tipos_residuos',
@@ -202,9 +196,6 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
         corregimiento: 'Bella Vista',
         latitud: 8.9936,
         longitud: -79.5197,
-        volumen: 100.5,
-        peso_estimado: 500.0,
-        costo_valor: 1500.0,
         contacto_responsable: '123-4567',
         nombre_responsable: 'Juan Pérez',
         tipos_residuos: 'Electrónico, Plástico',
@@ -367,8 +358,6 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
                       <TableRow>
                         <TableHead>Institución</TableHead>
                         <TableHead>Ciudad</TableHead>
-                        <TableHead>Volumen</TableHead>
-                        <TableHead>Valor</TableHead>
                         <TableHead>Tipos</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -379,8 +368,6 @@ export function BulkImport({ onImport, templateUrl }: BulkImportProps) {
                             {row.nombre_institucion}
                           </TableCell>
                           <TableCell>{row.ciudad}</TableCell>
-                          <TableCell>{row.volumen} m³</TableCell>
-                          <TableCell>${row.costo_valor}</TableCell>
                           <TableCell>
                             <div className="flex flex-wrap gap-1">
                               {row.tipos_residuos?.split(',').slice(0, 2).map((tipo, i) => (

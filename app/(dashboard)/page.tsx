@@ -31,9 +31,9 @@ export default function DashboardPage() {
 
   // Calculate stats (0 while loading — StatCard handles its own skeleton via isLoading prop)
   const totalLocations = locations?.length || 0
-  const totalVolume = locations?.reduce((sum, loc) => sum + (loc.volumen || 0), 0) || 0
-  const totalWeight = locations?.reduce((sum, loc) => sum + (loc.peso_estimado || 0), 0) || 0
-  const totalValue = locations?.reduce((sum, loc) => sum + (loc.costo_valor || 0), 0) || 0
+  const totalVolume = 0 // TODO: Calculate from waste_items aggregation
+  const totalWeight = 0 // TODO: Calculate from waste_items aggregation
+  const totalValue = 0 // TODO: Calculate from waste_items aggregation
 
   const recentActivityColumns = [
     {
@@ -132,7 +132,7 @@ export default function DashboardPage() {
               )}
             </div>
             <p className="text-slate-600 text-base pl-[52px]">
-              Panel de control del Sistema Nacional de Residuos de Panamá
+              Panel de control del Sistema de Inventario Nacional de Bienes Patrimoniales
             </p>
           </div>
           <div className="flex gap-3">

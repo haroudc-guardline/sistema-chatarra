@@ -65,9 +65,6 @@ export async function GET(request: NextRequest) {
         'Responsable': loc.nombre_responsable,
         'Teléfono': loc.telefono_responsable || loc.contacto_responsable || '',
         'Email': loc.email_responsable || '',
-        'Volumen Total (m³)': loc.volumen,
-        'Peso Total (kg)': loc.peso_estimado,
-        'Valor Total ($)': loc.costo_valor,
         'Cantidad Items': loc.waste_items?.length || 0,
         'Última Actualización': loc.ultima_actualizacion || loc.updated_at || loc.created_at
       }))
@@ -148,9 +145,6 @@ export async function GET(request: NextRequest) {
         'Ciudad': loc.ciudad,
         'Municipio': loc.municipio,
         'Corregimiento': loc.corregimiento || '',
-        'Volumen (m³)': loc.volumen,
-        'Peso Estimado (kg)': loc.peso_estimado,
-        'Costo/Valor': loc.costo_valor,
         'Teléfono': loc.telefono_responsable || loc.contacto_responsable || '',
         'Email': loc.email_responsable || '',
         'Nombre Responsable': loc.nombre_responsable,

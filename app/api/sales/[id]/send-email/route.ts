@@ -73,7 +73,7 @@ function buildEmailHtml(params: {
           Oferta de Venta de Chatarra
         </h1>
         <p style="margin:8px 0 0;color:#fca5a5;font-size:14px;">
-          Sistema Nacional de Residuos y Chatarra — Panamá
+          Sistema de Inventario Nacional de Bienes Patrimoniales — Panamá
         </p>
       </td>
     </tr>
@@ -163,7 +163,7 @@ function buildEmailHtml(params: {
     <tr>
       <td style="padding:20px 36px;background:#f8fafc;border-top:1px solid #e2e8f0;">
         <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">
-          Este mensaje fue generado por el Sistema Nacional de Residuos y Chatarra de Panamá.<br>
+          Este mensaje fue generado por el Sistema de Inventario Nacional de Bienes Patrimoniales de Panamá.<br>
           Si no esperaba este mensaje, puede ignorarlo.
         </p>
       </td>

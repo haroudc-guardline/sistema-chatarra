@@ -84,14 +84,6 @@ export default function LocationsPage() {
       sortable: true,
     },
     {
-      key: 'volumen',
-      header: 'Volumen',
-      cell: (location: LocationWithDetails) => (
-        <span className="text-sm">{location.volumen} m³</span>
-      ),
-      sortable: true,
-    },
-    {
       key: 'waste_types',
       header: 'Tipos',
       cell: (location: LocationWithDetails) => (

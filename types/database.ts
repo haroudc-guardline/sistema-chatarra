@@ -21,9 +21,6 @@ export interface Location {
   ciudad: string
   municipio: string
   corregimiento?: string
-  volumen: number
-  peso_estimado: number
-  costo_valor: number
   contacto_responsable?: string // Deprecated, kept for backward compatibility
   telefono_responsable?: string
   email_responsable?: string

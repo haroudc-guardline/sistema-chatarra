@@ -43,9 +43,6 @@ export async function POST(request: NextRequest) {
         ciudad: row.ciudad,
         municipio: row.municipio,
         corregimiento: row.corregimiento,
-        volumen: row.volumen,
-        peso_estimado: row.peso_estimado,
-        costo_valor: row.costo_valor,
         contacto_responsable: row.contacto_responsable,
         nombre_responsable: row.nombre_responsable,
       })

@@ -1,5 +1,5 @@
 -- ============================================
--- Sistema de Administración de Residuos y Chatarra - Panamá
+-- Sistema de Inventario Nacional de Bienes Patrimoniales - Panamá
 -- Database Schema
 -- ============================================
 
@@ -33,9 +33,6 @@ CREATE TABLE IF NOT EXISTS locations (
   ciudad TEXT NOT NULL,
   municipio TEXT NOT NULL,
   corregimiento TEXT,
-  volumen DECIMAL(12,2) NOT NULL CHECK (volumen >= 0),
-  peso_estimado DECIMAL(12,2) NOT NULL CHECK (peso_estimado >= 0),
-  costo_valor DECIMAL(12,2) NOT NULL CHECK (costo_valor >= 0),
   contacto_responsable TEXT NOT NULL,
   nombre_responsable TEXT NOT NULL,
   ultima_actualizacion TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

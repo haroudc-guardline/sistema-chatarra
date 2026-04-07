@@ -48,9 +48,6 @@ export const exportService = {
       Responsable: loc.nombre_responsable,
       Teléfono: loc.telefono_responsable || loc.contacto_responsable || '',
       Email: loc.email_responsable || '',
-      'Volumen Total (m³)': loc.volumen,
-      'Peso Total (kg)': loc.peso_estimado,
-      'Valor Total ($)': loc.costo_valor,
       'Cantidad Items': loc.waste_items?.length || 0,
       'Última Actualización': loc.ultima_actualizacion || loc.updated_at || loc.created_at
     }))

@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -24,13 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { MapComponent } from '@/components/map/MapComponent'
 import { PlacesAutocomplete } from '@/components/map/PlacesAutocomplete'
 import { FileUpload } from './FileUpload'
-import { InlineWasteItemEditor, type PendingWasteItem } from '@/components/waste/InlineWasteItemEditor'
 import { Loader2, MapPin, Search } from 'lucide-react'
 import type { Location, LocationWithDetails } from '@/types/database'
 import { locationService } from '@/lib/services/location-service'
@@ -54,27 +51,15 @@ type LocationFormData = z.infer<typeof locationSchema>
 interface LocationFormProps {
   mode: 'create' | 'edit'
   initialData?: LocationWithDetails
-  initialExistingItems?: Array<{
-    id: number
-    waste_type_name: string
-    subcategoria?: string | null
-    volume: number
-    weight: number
-    value: number
-    quality?: string | null
-  }>
   onSubmit: (
     data: Omit<Location, 'id' | 'created_at' | 'updated_at'>,
-    wasteTypeIds: number[],
-    pendingItems: PendingWasteItem[]
   ) => Promise<void>
   isSubmitting?: boolean
 }
 
-export function LocationForm({ mode, initialData, initialExistingItems = [], onSubmit, isSubmitting }: LocationFormProps) {
+export function LocationForm({ mode, initialData, onSubmit, isSubmitting }: LocationFormProps) {
   const router = useRouter()
-  const { wasteTypes, cities } = useLocations()
-  const [pendingItems, setPendingItems] = useState<PendingWasteItem[]>([])
+  const { cities } = useLocations()
   const [municipios, setMunicipios] = useState<string[]>([])
   const [isLoadingMunicipios, setIsLoadingMunicipios] = useState(false)
   const [isGeocoding, setIsGeocoding] = useState(false)
@@ -174,29 +159,12 @@ export function LocationForm({ mode, initialData, initialExistingItems = [], onS
   }
 
   const handleSubmit = async (data: LocationFormData) => {
-    // Calculate aggregates from items (existing + pending)
-    const allItemsForCalc = [
-      ...initialExistingItems.map(ei => ({ volume: ei.volume, weight: ei.weight, value: ei.value, waste_type_id: 0 })),
-      ...pendingItems.map(i => ({ volume: i.volume, weight: i.weight, value: i.value, waste_type_id: i.waste_type_id })),
-    ]
-    const volumen = allItemsForCalc.reduce((sum, i) => sum + (i.volume || 0), 0)
-    const peso_estimado = allItemsForCalc.reduce((sum, i) => sum + (i.weight || 0), 0)
-    const costo_valor = allItemsForCalc.reduce((sum, i) => sum + (i.value || 0), 0)
-
-    // Derive unique waste type IDs from pending items
-    const wasteTypeIds = [...new Set(pendingItems.map(i => i.waste_type_id))]
-
     await onSubmit(
       {
         ...data,
-        volumen,
-        peso_estimado,
-        costo_valor,
         zona: getZoneForCity(data.ciudad),
         corregimiento: data.corregimiento || undefined,
       } as Omit<Location, 'id' | 'created_at' | 'updated_at'>,
-      wasteTypeIds,
-      pendingItems
     )
   }
 
@@ -399,20 +367,6 @@ export function LocationForm({ mode, initialData, initialExistingItems = [], onS
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Items de Residuos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <InlineWasteItemEditor
-                  wasteTypes={wasteTypes || []}
-                  items={pendingItems}
-                  onChange={setPendingItems}
-                  existingItems={initialExistingItems}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
                 <CardTitle>Ubicación en el Mapa</CardTitle>
               </CardHeader>
               <CardContent>
@@ -479,9 +433,6 @@ export function LocationForm({ mode, initialData, initialExistingItems = [], onS
                         longitud: selectedPosition.lng,
                         ciudad: '',
                         municipio: '',
-                        volumen: 0,
-                        peso_estimado: 0,
-                        costo_valor: 0,
                         contacto_responsable: '',
                         nombre_responsable: '',
                         created_at: '',
@@ -533,7 +484,7 @@ export function LocationForm({ mode, initialData, initialExistingItems = [], onS
           </Button>
           <Button
             type="submit"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-blue-600 hover:bg-blue-700"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

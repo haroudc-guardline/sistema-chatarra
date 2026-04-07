@@ -16,9 +16,6 @@ interface ImportRow {
   corregimiento?: string
   latitud: number
   longitud: number
-  volumen: number
-  peso_estimado: number
-  costo_valor: number
   contacto_responsable: string
   nombre_responsable: string
   tipos_residuos: string

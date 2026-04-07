@@ -99,9 +99,9 @@ export default function SimpleLoginPage() {
           </div>
           
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
-            Sistema Nacional de{' '}
+            Sistema de Inventario Nacional de{' '}
             <span className="bg-gradient-to-r from-blue-200 to-emerald-200 bg-clip-text text-transparent">
-              Administración de Residuos
+              Bienes Patrimoniales
             </span>
           </h1>
           
@@ -227,7 +227,7 @@ export default function SimpleLoginPage() {
 
           <div className="text-center mt-8 pt-6 border-t border-slate-200">
             <p className="text-xs text-slate-400">
-              © 2026 Sistema Nacional de Residuos - Panamá
+              © 2026 Sistema de Inventario Nacional de Bienes Patrimoniales - Panamá
             </p>
             <p className="text-xs text-slate-400 mt-1">
               Todos los derechos reservados

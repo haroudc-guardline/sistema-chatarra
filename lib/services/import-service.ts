@@ -9,9 +9,6 @@ const locationImportSchema = z.object({
   ciudad: z.string().min(1),
   municipio: z.string().min(1),
   corregimiento: z.string().optional(),
-  volumen: z.number().min(0),
-  peso_estimado: z.number().min(0),
-  costo_valor: z.number().min(0),
   contacto_responsable: z.string().min(1),
   nombre_responsable: z.string().min(1),
   tipo_residuos: z.string().optional() // Comma-separated waste type names
@@ -42,9 +39,6 @@ export const importService = {
           ...row,
           latitud: parseFloat(row.latitud),
           longitud: parseFloat(row.longitud),
-          volumen: parseFloat(row.volumen),
-          peso_estimado: parseFloat(row.peso_estimado),
-          costo_valor: parseFloat(row.costo_valor)
         }
 
         const validated = locationImportSchema.parse(parsedRow)
@@ -73,9 +67,6 @@ export const importService = {
         ciudad: 'Panamá',
         municipio: 'Panamá',
         corregimiento: 'Bella Vista',
-        volumen: 100.5,
-        peso_estimado: 500.25,
-        costo_valor: 1500.00,
         contacto_responsable: '1234-5678',
         nombre_responsable: 'Juan Pérez',
         tipo_residuos: 'Chatarra metálica ferrosa, Residuos electrónicos'

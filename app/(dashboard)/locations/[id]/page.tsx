@@ -26,9 +26,6 @@ import {
   Edit,
   Trash2,
   MapPin,
-  Package,
-  Weight,
-  DollarSign,
   User,
   Phone,
 } from 'lucide-react'
@@ -182,28 +179,8 @@ export default function LocationDetailPage() {
 
               <Separator />
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-red-600" />
-                  <div>
-                    <p className="text-sm text-slate-500">Volumen</p>
-                    <p className="font-medium">{location.volumen} m³</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Weight className="h-4 w-4 text-blue-500" />
-                  <div>
-                    <p className="text-sm text-slate-500">Peso</p>
-                    <p className="font-medium">{location.peso_estimado} kg</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-green-500" />
-                  <div>
-                    <p className="text-sm text-slate-500">Valor</p>
-                    <p className="font-medium">${location.costo_valor}</p>
-                  </div>
-                </div>
+              <div className="text-sm text-slate-500">
+                <p>{location.ciudad} — {location.municipio}</p>
               </div>
             </CardContent>
           </Card>
