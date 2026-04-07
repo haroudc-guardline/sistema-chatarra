@@ -108,11 +108,14 @@ export function AddToolDialog({ open, onOpenChange, locations, onSuccess, editIt
     setIsSubmitting(true)
     setError(null)
     try {
+      const cleaned = Object.fromEntries(
+        Object.entries(data).map(([k, v]) => [k, v === '' ? undefined : v])
+      ) as any
       let tool: StockTool
       if (isEditing) {
-        tool = await stockItemService.updateTool(editItem!.id, data)
+        tool = await stockItemService.updateTool(editItem!.id, cleaned)
       } else {
-        tool = await stockItemService.createTool(data)
+        tool = await stockItemService.createTool(cleaned)
       }
       if (pendingFiles.length > 0) {
         await stockItemService.uploadPhotos('tool', tool.id, pendingFiles)

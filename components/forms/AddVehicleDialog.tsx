@@ -115,11 +115,15 @@ export function AddVehicleDialog({ open, onOpenChange, locations, onSuccess, edi
     setIsSubmitting(true)
     setError(null)
     try {
+      // Clean empty strings to undefined to avoid DB CHECK constraint violations
+      const cleaned = Object.fromEntries(
+        Object.entries(data).map(([k, v]) => [k, v === '' ? undefined : v])
+      ) as any
       let vehicle: StockVehicle
       if (isEditing) {
-        vehicle = await stockItemService.updateVehicle(editItem!.id, data)
+        vehicle = await stockItemService.updateVehicle(editItem!.id, cleaned)
       } else {
-        vehicle = await stockItemService.createVehicle(data)
+        vehicle = await stockItemService.createVehicle(cleaned)
       }
       if (pendingFiles.length > 0) {
         await stockItemService.uploadPhotos('vehicle', vehicle.id, pendingFiles)

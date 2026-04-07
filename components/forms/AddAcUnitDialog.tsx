@@ -104,11 +104,14 @@ export function AddAcUnitDialog({ open, onOpenChange, locations, onSuccess, edit
     setIsSubmitting(true)
     setError(null)
     try {
+      const cleaned = Object.fromEntries(
+        Object.entries(data).map(([k, v]) => [k, v === '' ? undefined : v])
+      ) as any
       let unit: StockAcUnit
       if (isEditing) {
-        unit = await stockItemService.updateAcUnit(editItem!.id, data)
+        unit = await stockItemService.updateAcUnit(editItem!.id, cleaned)
       } else {
-        unit = await stockItemService.createAcUnit(data)
+        unit = await stockItemService.createAcUnit(cleaned)
       }
       if (pendingFiles.length > 0) {
         await stockItemService.uploadPhotos('ac_unit', unit.id, pendingFiles)
