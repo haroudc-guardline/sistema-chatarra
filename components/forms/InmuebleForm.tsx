@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,6 +13,9 @@ import {
 } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'
+import { PlacesAutocomplete } from '@/components/map/PlacesAutocomplete'
+import { useLocations } from '@/hooks/useLocations'
+import { locationService } from '@/lib/services/location-service'
 import { useInmuebleTypes, useInmuebleTypeMutations, useInmuebleActivoTypes, useInmuebleActivoTypeMutations } from '@/hooks/useInmuebles'
 import type { Location, StockInmueble } from '@/types/database'
 
@@ -56,6 +59,10 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
   const [newTypeName, setNewTypeName] = useState('')
   const [showNewActivoTypeInput, setShowNewActivoTypeInput] = useState(false)
   const [newActivoTypeName, setNewActivoTypeName] = useState('')
+
+  const { cities } = useLocations()
+  const [municipios, setMunicipios] = useState<string[]>([])
+  const [isLoadingMunicipios, setIsLoadingMunicipios] = useState(false)
 
   const { types: inmuebleTypes } = useInmuebleTypes()
   const { create: createType } = useInmuebleTypeMutations()
@@ -101,6 +108,17 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
     activo_type_id: watch('activo_type_id'),
   }
 
+  const watchedCiudad = watch('ubicacion_ciudad')
+
+  useEffect(() => {
+    if (!watchedCiudad) { setMunicipios([]); return }
+    setIsLoadingMunicipios(true)
+    locationService.getMunicipios(watchedCiudad)
+      .then(setMunicipios)
+      .catch(() => setMunicipios([]))
+      .finally(() => setIsLoadingMunicipios(false))
+  }, [watchedCiudad])
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     const newFiles = [...pendingFiles, ...files].slice(0, 10)
@@ -116,7 +134,11 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
   }
 
   const handleFormSubmit = async (data: FormData) => {
-    await onSubmit(data, pendingFiles)
+    // Clean empty strings to undefined so DB defaults apply and CHECK constraints pass
+    const cleaned = Object.fromEntries(
+      Object.entries(data).map(([k, v]) => [k, v === '' ? undefined : v])
+    )
+    await onSubmit(cleaned, pendingFiles)
   }
 
   const handleAddNewType = async () => {
@@ -385,25 +407,60 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
           {/* Ubicacion */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Ubicacion del Inmueble</CardTitle>
+              <CardTitle className="text-base">Ubicación del Inmueble</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Nombre de Ubicación</Label>
+                <Input {...register('ubicacion_nombre')} placeholder="Edificio Central" />
+              </div>
+              <div className="space-y-2">
+                <Label>Dirección</Label>
+                <PlacesAutocomplete
+                  value={watch('ubicacion_direccion') || ''}
+                  onChange={(val) => setValue('ubicacion_direccion', val)}
+                  onPlaceSelect={(place) => {
+                    setValue('ubicacion_direccion', place.address)
+                  }}
+                  placeholder="Escribe para buscar dirección..."
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Nombre de Ubicacion</Label>
-                  <Input {...register('ubicacion_nombre')} placeholder="Edificio Central" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Direccion</Label>
-                  <Input {...register('ubicacion_direccion')} placeholder="Av. Principal, #123" />
+                  <Label>Provincia / Ciudad</Label>
+                  <Select
+                    value={watchedCiudad || ''}
+                    onValueChange={(v) => {
+                      setValue('ubicacion_ciudad', v)
+                      setValue('ubicacion_municipio', '')
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar provincia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cities?.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Municipio</Label>
-                  <Input {...register('ubicacion_municipio')} placeholder="Panama" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Ciudad</Label>
-                  <Input {...register('ubicacion_ciudad')} placeholder="Ciudad de Panama" />
+                  <Select
+                    value={watch('ubicacion_municipio') || ''}
+                    onValueChange={(v) => setValue('ubicacion_municipio', v)}
+                    disabled={!watchedCiudad || isLoadingMunicipios}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={!watchedCiudad ? 'Selecciona ciudad primero' : isLoadingMunicipios ? 'Cargando...' : 'Seleccionar municipio'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {municipios.map((m) => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>

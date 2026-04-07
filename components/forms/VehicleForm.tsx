@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Loader2, Upload, X, Image as ImageIcon } from 'lucide-react'
+import { PlacesAutocomplete } from '@/components/map/PlacesAutocomplete'
+import { useLocations } from '@/hooks/useLocations'
+import { locationService } from '@/lib/services/location-service'
 import type { Location, StockVehicle } from '@/types/database'
 
 const schema = z.object({
@@ -58,6 +61,9 @@ interface VehicleFormProps {
 }
 
 export function VehicleForm({ locations, onSubmit, onCancel, editItem, isSubmitting = false }: VehicleFormProps) {
+  const { cities } = useLocations()
+  const [municipios, setMunicipios] = useState<string[]>([])
+  const [isLoadingMunicipios, setIsLoadingMunicipios] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -125,7 +131,11 @@ export function VehicleForm({ locations, onSubmit, onCancel, editItem, isSubmitt
   }
 
   const handleFormSubmit = async (data: FormData) => {
-    await onSubmit(data, pendingFiles)
+    // Clean empty strings to undefined so DB CHECK constraints pass
+    const cleaned = Object.fromEntries(
+      Object.entries(data).map(([k, v]) => [k, v === '' ? undefined : v])
+    )
+    await onSubmit(cleaned, pendingFiles)
   }
 
   return (
@@ -379,21 +389,28 @@ export function VehicleForm({ locations, onSubmit, onCancel, editItem, isSubmitt
           {/* Ubicacion del Vehiculo */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Ubicacion del Vehiculo</CardTitle>
+              <CardTitle className="text-base">Ubicación del Vehículo</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Nombre de Ubicación</Label>
+                <Input {...register('ubicacion_nombre')} placeholder="Depósito Central" />
+              </div>
+              <div className="space-y-2">
+                <Label>Dirección</Label>
+                <PlacesAutocomplete
+                  value={watch('ubicacion_direccion') || ''}
+                  onChange={(val) => setValue('ubicacion_direccion', val)}
+                  onPlaceSelect={(place) => {
+                    setValue('ubicacion_direccion', place.address)
+                  }}
+                  placeholder="Escribe para buscar dirección..."
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Nombre de Ubicacion</Label>
-                  <Input {...register('ubicacion_nombre')} placeholder="Deposito Central" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Direccion</Label>
-                  <Input {...register('ubicacion_direccion')} placeholder="Av. Principal, #123" />
-                </div>
-                <div className="space-y-2">
                   <Label>Municipio</Label>
-                  <Input {...register('ubicacion_municipio')} placeholder="Panama" />
+                  <Input {...register('ubicacion_municipio')} placeholder="Panamá" />
                 </div>
                 <div className="space-y-2">
                   <Label>Parroquia / Corregimiento</Label>
