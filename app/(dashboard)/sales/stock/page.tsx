@@ -55,7 +55,7 @@ import StockExitDialog from '@/components/forms/StockExitDialog'
 
 const TIPO_SALIDA_BADGE: Record<TipoSalida, string> = {
   Venta: 'bg-green-100 text-green-800',
-  'Donaci\u00f3n': 'bg-blue-100 text-blue-800',
+  'Donaci\ón': 'bg-blue-100 text-blue-800',
   Traspaso: 'bg-purple-100 text-purple-800',
   Permuta: 'bg-amber-100 text-amber-800',
   Subasta: 'bg-teal-100 text-teal-800',
@@ -69,7 +69,7 @@ const ITEM_TYPE_ICON: Record<string, typeof Car> = {
 }
 
 const ITEM_TYPE_LABEL: Record<string, string> = {
-  vehicle: 'Veh\u00edculo',
+  vehicle: 'Veh\ículo',
   ac_unit: 'A/C',
   tool: 'Herramienta',
 }
@@ -117,7 +117,7 @@ export default function StockExitsPage() {
   const stats = {
     total: totalCount,
     ventas: items.filter((e) => e.tipo_salida === 'Venta').length,
-    donaciones: items.filter((e) => e.tipo_salida === 'Donaci\u00f3n').length,
+    donaciones: items.filter((e) => e.tipo_salida === 'Donaci\ón').length,
     otros: items.filter((e) =>
       ['Traspaso', 'Permuta', 'Subasta', 'Descarte'].includes(e.tipo_salida)
     ).length,
@@ -190,7 +190,7 @@ export default function StockExitsPage() {
         <Card className="bg-white/70 backdrop-blur-md border border-slate-200/50 shadow-sm">
           <CardContent className="p-4 flex flex-col sm:flex-row gap-3">
             <Input
-              placeholder="Buscar por descripci\u00f3n o responsable..."
+              placeholder="Buscar por descripci\ón o responsable..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value)
@@ -210,7 +210,7 @@ export default function StockExitsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los tipos</SelectItem>
-                <SelectItem value="vehicle">Veh\u00edculo</SelectItem>
+                <SelectItem value="vehicle">Veh\ículo</SelectItem>
                 <SelectItem value="ac_unit">Aire Acondicionado</SelectItem>
                 <SelectItem value="tool">Herramienta</SelectItem>
               </SelectContent>
@@ -228,7 +228,7 @@ export default function StockExitsPage() {
               <SelectContent>
                 <SelectItem value="all">Todas las salidas</SelectItem>
                 <SelectItem value="Venta">Venta</SelectItem>
-                <SelectItem value="Donaci\u00f3n">Donaci\u00f3n</SelectItem>
+                <SelectItem value="Donaci\ón">Donaci\ón</SelectItem>
                 <SelectItem value="Traspaso">Traspaso</SelectItem>
                 <SelectItem value="Permuta">Permuta</SelectItem>
                 <SelectItem value="Subasta">Subasta</SelectItem>
@@ -268,7 +268,7 @@ export default function StockExitsPage() {
                   <TableHead>Fecha</TableHead>
                   <TableHead>Tipo Salida</TableHead>
                   <TableHead>Activo</TableHead>
-                  <TableHead>Instituci\u00f3n</TableHead>
+                  <TableHead>Instituci\ón</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
@@ -329,7 +329,7 @@ export default function StockExitsPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200/50">
                 <p className="text-sm text-slate-500">
-                  P\u00e1gina {page} de {totalPages} ({totalCount} resultados)
+                  P\ágina {page} de {totalPages} ({totalCount} resultados)
                 </p>
                 <div className="flex items-center gap-1">
                   <Button
@@ -369,7 +369,7 @@ export default function StockExitsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar salida</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acci\u00f3n no se puede deshacer. \u00bfConfirmas que deseas eliminar esta salida de stock?
+              Esta acci\ón no se puede deshacer. \¿Confirmas que deseas eliminar esta salida de stock?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

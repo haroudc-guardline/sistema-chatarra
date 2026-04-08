@@ -64,7 +64,7 @@ const exitFormSchema = z.object({
   descripcion: z.string().optional(),
   responsable_nombre: z.string().optional(),
   responsable_telefono: z.string().optional(),
-  responsable_email: z.string().email('Email inv\u00e1lido').optional().or(z.literal('')),
+  responsable_email: z.string().email('Email inválido').optional().or(z.literal('')),
 })
 
 type ExitFormValues = z.infer<typeof exitFormSchema>
@@ -187,7 +187,7 @@ export default function StockExitDialog({ open, onClose }: StockExitDialogProps)
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="vehicle">Veh\u00edculo</SelectItem>
+                  <SelectItem value="vehicle">Vehículo</SelectItem>
                   <SelectItem value="ac_unit">Aire Acondicionado</SelectItem>
                   <SelectItem value="tool">Herramienta</SelectItem>
                 </SelectContent>
@@ -222,7 +222,7 @@ export default function StockExitDialog({ open, onClose }: StockExitDialogProps)
                       <TableHead>Tipo</TableHead>
                       <TableHead>Marca / Modelo</TableHead>
                       <TableHead>Identificador</TableHead>
-                      <TableHead>Instituci\u00f3n</TableHead>
+                      <TableHead>Institución</TableHead>
                       <TableHead>Tipo Activo</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -311,7 +311,7 @@ export default function StockExitDialog({ open, onClose }: StockExitDialogProps)
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="Venta">Venta</SelectItem>
-                        <SelectItem value="Donación">Donaci\u00f3n</SelectItem>
+                        <SelectItem value="Donación">Donación</SelectItem>
                         <SelectItem value="Traspaso">Traspaso</SelectItem>
                         <SelectItem value="Permuta">Permuta</SelectItem>
                         <SelectItem value="Subasta">Subasta</SelectItem>
@@ -369,7 +369,7 @@ export default function StockExitDialog({ open, onClose }: StockExitDialogProps)
                 name="descripcion"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descripci\u00f3n</FormLabel>
+                    <FormLabel>Descripción</FormLabel>
                     <FormControl>
                       <Textarea
                         rows={3}
@@ -404,7 +404,7 @@ export default function StockExitDialog({ open, onClose }: StockExitDialogProps)
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input placeholder="Tel\u00e9fono" {...field} />
+                          <Input placeholder="Teléfono" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -427,7 +427,7 @@ export default function StockExitDialog({ open, onClose }: StockExitDialogProps)
 
               <DialogFooter className="gap-2">
                 <Button type="button" variant="outline" onClick={handleBack}>
-                  Atr\u00e1s
+                  Atrás
                 </Button>
                 <Button
                   type="submit"

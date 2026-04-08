@@ -171,7 +171,7 @@ export default function DashboardPage() {
     },
     {
       label: 'Volumen Total',
-      value: `${(stats?.descarte.volumen ?? 0).toLocaleString('es-PA')} m\u00B3`,
+      value: `${(stats?.descarte.volumen ?? 0).toLocaleString('es-PA')} m\³`,
       icon: Package,
       color: 'text-teal-600',
       bgColor: 'bg-teal-100',
