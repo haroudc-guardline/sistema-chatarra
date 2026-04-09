@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 import { useStockExitSearch, useStockExitMutations } from '@/hooks/useStockExits'
+import { useLocations } from '@/hooks/useLocations'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -41,6 +42,8 @@ import {
   Car,
   Wind,
   Wrench,
+  Building2,
+  Cog,
   Trash2,
   Loader2,
   PackageOpen,
@@ -66,12 +69,16 @@ const ITEM_TYPE_ICON: Record<string, typeof Car> = {
   vehicle: Car,
   ac_unit: Wind,
   tool: Wrench,
+  inmueble: Building2,
+  part: Cog,
 }
 
 const ITEM_TYPE_LABEL: Record<string, string> = {
-  vehicle: 'Veh\ículo',
+  vehicle: 'Vehículo',
   ac_unit: 'A/C',
   tool: 'Herramienta',
+  inmueble: 'Inmueble',
+  part: 'Pieza',
 }
 
 function fmt(n: number) {
@@ -92,18 +99,26 @@ function formatDate(dateStr: string) {
 
 export default function StockExitsPage() {
   const { isAdmin } = useAuth()
+  const { locations } = useLocations()
   const [search, setSearch] = useState('')
   const [itemType, setItemType] = useState<string>('all')
   const [tipoSalida, setTipoSalida] = useState<string>('all')
+  const [institucionFilter, setInstitucionFilter] = useState<string>('all')
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const limit = 25
 
+  const instituciones = useMemo(() => {
+    const set = new Set((locations || []).map((l) => l.nombre_institucion).filter(Boolean))
+    return Array.from(set).sort()
+  }, [locations])
+
   const filters = {
     ...(search ? { search } : {}),
     ...(itemType !== 'all' ? { item_type: itemType } : {}),
     ...(tipoSalida !== 'all' ? { tipo_salida: tipoSalida } : {}),
+    ...(institucionFilter !== 'all' ? { nombre_institucion: institucionFilter } : {}),
     page,
     limit,
   }
@@ -199,6 +214,23 @@ export default function StockExitsPage() {
               className="flex-1"
             />
             <Select
+              value={institucionFilter}
+              onValueChange={(v) => {
+                setInstitucionFilter(v)
+                setPage(1)
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las instituciones</SelectItem>
+                {instituciones.map((inst) => (
+                  <SelectItem key={inst} value={inst}>{inst}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
               value={itemType}
               onValueChange={(v) => {
                 setItemType(v)
@@ -210,9 +242,11 @@ export default function StockExitsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los tipos</SelectItem>
-                <SelectItem value="vehicle">Veh\ículo</SelectItem>
+                <SelectItem value="vehicle">Vehículo</SelectItem>
                 <SelectItem value="ac_unit">Aire Acondicionado</SelectItem>
                 <SelectItem value="tool">Herramienta</SelectItem>
+                <SelectItem value="inmueble">Inmueble</SelectItem>
+                <SelectItem value="part">Pieza</SelectItem>
               </SelectContent>
             </Select>
             <Select

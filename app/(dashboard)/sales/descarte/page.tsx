@@ -1,14 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { useAuth } from '@/hooks/useAuth'
 import { useSales } from '@/hooks/useSales'
+import { useLocations } from '@/hooks/useLocations'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Card,
   CardContent,
@@ -16,14 +15,6 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
@@ -44,18 +35,14 @@ import {
 import {
   ShoppingCart,
   Plus,
-  TrendingUp,
   Building2,
   Clock,
   CheckCircle,
-  XCircle,
-  Pencil,
   Trash2,
   DollarSign,
-  Settings,
   Loader2,
 } from 'lucide-react'
-import type { SaleListingStatus, MarketPrice } from '@/types/database'
+import type { SaleListingStatus } from '@/types/database'
 
 const STATUS_LABELS: Record<SaleListingStatus, { label: string; color: string }> = {
   draft: { label: 'Borrador', color: 'bg-slate-100 text-slate-700' },
@@ -71,126 +58,31 @@ function fmt(n: number) {
   })
 }
 
-function MarketPriceModal({
-  open,
-  onClose,
-  marketPrices,
-  onSave,
-  isSaving,
-}: {
-  open: boolean
-  onClose: () => void
-  marketPrices: MarketPrice[]
-  onSave: (id: number, updates: { price_per_kg: number; price_per_m3: number }) => Promise<void>
-  isSaving: boolean
-}) {
-  const [edits, setEdits] = useState<Record<number, { price_per_kg: string; price_per_m3: string }>>({})
-
-  const handleSave = async () => {
-    for (const [idStr, vals] of Object.entries(edits)) {
-      const id = parseInt(idStr)
-      const price_per_kg = parseFloat(vals.price_per_kg)
-      const price_per_m3 = parseFloat(vals.price_per_m3)
-      if (!isNaN(price_per_kg) && !isNaN(price_per_m3)) {
-        await onSave(id, { price_per_kg, price_per_m3 })
-      }
-    }
-    setEdits({})
-    onClose()
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-red-600" />
-            Precios de Mercado
-          </DialogTitle>
-          <DialogDescription>
-            Actualiza los precios de referencia por tipo de residuo. Se usan para calcular precios sugeridos.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3 py-2">
-          {marketPrices.map((mp) => {
-            const edit = edits[mp.id] ?? {
-              price_per_kg: mp.price_per_kg.toString(),
-              price_per_m3: mp.price_per_m3.toString(),
-            }
-            return (
-              <div key={mp.id} className="grid grid-cols-3 gap-3 items-center p-3 border rounded-lg bg-slate-50">
-                <div>
-                  <p className="text-sm font-medium text-slate-800">{mp.waste_type?.nombre}</p>
-                  <p className="text-xs text-slate-400">{mp.waste_type?.categoria}</p>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">$/kg</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={edit.price_per_kg}
-                    onChange={(e) =>
-                      setEdits((prev) => ({
-                        ...prev,
-                        [mp.id]: { ...edit, price_per_kg: e.target.value },
-                      }))
-                    }
-                    className="h-8 text-sm"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">$/m³</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={edit.price_per_m3}
-                    onChange={(e) =>
-                      setEdits((prev) => ({
-                        ...prev,
-                        [mp.id]: { ...edit, price_per_m3: e.target.value },
-                      }))
-                    }
-                    className="h-8 text-sm"
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-red-600 hover:bg-red-700"
-          >
-            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Guardar Precios
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 export default function SalesDescartePage() {
-  const { isAdmin } = useAuth()
+  const { locations } = useLocations()
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
-  const [showPricesModal, setShowPricesModal] = useState(false)
+  const [institucionFilter, setInstitucionFilter] = useState<string>('all')
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
-  const { listings, marketPrices, isLoading, deleteListing, isDeleting, updateMarketPrice, isUpdatingPrice } =
+  const instituciones = useMemo(() => {
+    const set = new Set((locations || []).map((l) => l.nombre_institucion).filter(Boolean))
+    return Array.from(set).sort()
+  }, [locations])
+
+  const { listings, isLoading, deleteListing, isDeleting } =
     useSales(statusFilter !== 'all' ? { status: statusFilter } : undefined)
 
-  const filtered = (listings ?? []).filter((l) =>
-    search ? l.title.toLowerCase().includes(search.toLowerCase()) ||
-      l.location?.nombre_institucion?.toLowerCase().includes(search.toLowerCase()) : true
-  )
+  const filtered = (listings ?? []).filter((l) => {
+    const matchSearch = search
+      ? l.title.toLowerCase().includes(search.toLowerCase()) ||
+        l.location?.nombre_institucion?.toLowerCase().includes(search.toLowerCase())
+      : true
+    const matchInst = institucionFilter !== 'all'
+      ? l.location?.nombre_institucion === institucionFilter
+      : true
+    return matchSearch && matchInst
+  })
 
   const stats = {
     total: listings?.length ?? 0,
@@ -216,16 +108,6 @@ export default function SalesDescartePage() {
             { label: 'Materiales de Descarte' },
           ]}
           actions={[
-            ...(isAdmin
-              ? [
-                  {
-                    label: 'Precios de Mercado',
-                    onClick: () => setShowPricesModal(true),
-                    icon: Settings,
-                    variant: 'outline' as const,
-                  },
-                ]
-              : []),
             {
               label: 'Nueva Oferta',
               href: '/sales/descarte/new',
@@ -266,6 +148,17 @@ export default function SalesDescartePage() {
               onChange={(e) => setSearch(e.target.value)}
               className="flex-1"
             />
+            <Select value={institucionFilter} onValueChange={setInstitucionFilter}>
+              <SelectTrigger className="w-full sm:w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las instituciones</SelectItem>
+                {instituciones.map((inst) => (
+                  <SelectItem key={inst} value={inst}>{inst}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-44">
                 <SelectValue />
@@ -366,17 +259,6 @@ export default function SalesDescartePage() {
           </div>
         )}
       </div>
-
-      {/* Market Prices Modal (admin) */}
-      {isAdmin && marketPrices && (
-        <MarketPriceModal
-          open={showPricesModal}
-          onClose={() => setShowPricesModal(false)}
-          marketPrices={marketPrices}
-          onSave={async (id, updates) => { await updateMarketPrice({ id, updates }) }}
-          isSaving={isUpdatingPrice}
-        />
-      )}
 
       {/* Delete Confirm */}
       <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>

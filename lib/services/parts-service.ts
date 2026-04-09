@@ -5,6 +5,8 @@ const CATEGORY_PATH: Record<PartCategory, string> = {
   vehicle: 'autos',
   ac_unit: 'aires',
   tool: 'herramientas',
+  furniture: 'mobiliario',
+  electronic: 'electronicos',
 }
 
 function buildParams(filters: Record<string, string | number | undefined>): URLSearchParams {

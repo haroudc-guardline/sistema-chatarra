@@ -10,37 +10,37 @@ function createSupabaseClient(cookieStore: Awaited<ReturnType<typeof cookies>>) 
   )
 }
 
-const ITEM_TABLE_MAP: Record<string, string> = {
-  vehicle: 'stock_vehicles',
-  ac_unit: 'stock_ac_units',
-  tool: 'stock_tools',
-}
-
 async function fetchItemDetail(
   supabase: ReturnType<typeof createServerClient>,
   itemType: string,
   itemId: number
 ) {
-  const table = ITEM_TABLE_MAP[itemType]
-  if (!table) return null
-
-  const selectFields =
-    itemType === 'vehicle'
-      ? 'marca, modelo, placa, tipo_activo'
-      : itemType === 'ac_unit'
-        ? 'marca, modelo, numero_serie, tipo_activo'
-        : 'nombre, marca, modelo, numero_serie, tipo_activo'
-
-  const { data } = await supabase.from(table).select(selectFields).eq('id', itemId).single()
-  if (!data) return null
-
-  return {
-    marca: data.marca ?? data.nombre ?? '',
-    modelo: data.modelo ?? '',
-    placa: data.placa,
-    numero_serie: data.numero_serie,
-    tipo_activo: data.tipo_activo,
+  if (itemType === 'vehicle') {
+    const { data } = await supabase.from('stock_vehicles').select('marca, modelo, placa, tipo_activo').eq('id', itemId).single()
+    if (!data) return null
+    return { marca: data.marca ?? '', modelo: data.modelo ?? '', placa: data.placa, tipo_activo: data.tipo_activo }
   }
+  if (itemType === 'ac_unit') {
+    const { data } = await supabase.from('stock_ac_units').select('marca, modelo, numero_serie, tipo_activo').eq('id', itemId).single()
+    if (!data) return null
+    return { marca: data.marca ?? '', modelo: data.modelo ?? '', numero_serie: data.numero_serie, tipo_activo: data.tipo_activo }
+  }
+  if (itemType === 'tool') {
+    const { data } = await supabase.from('stock_tools').select('nombre, marca, modelo, numero_serie, tipo_activo').eq('id', itemId).single()
+    if (!data) return null
+    return { marca: data.marca ?? data.nombre ?? '', modelo: data.modelo ?? '', numero_serie: data.numero_serie, tipo_activo: data.tipo_activo }
+  }
+  if (itemType === 'inmueble') {
+    const { data } = await supabase.from('stock_inmuebles').select('nombre, inmueble_type:inmueble_types(nombre)').eq('id', itemId).single()
+    if (!data) return null
+    return { marca: data.nombre ?? '', modelo: (data.inmueble_type as any)?.nombre ?? '' }
+  }
+  if (itemType === 'part') {
+    const { data } = await supabase.from('stock_parts').select('marca, modelo, codigo_marbete, part_type:part_types(nombre)').eq('id', itemId).single()
+    if (!data) return null
+    return { marca: data.marca ?? (data.part_type as any)?.nombre ?? '', modelo: data.modelo ?? '', numero_serie: data.codigo_marbete }
+  }
+  return null
 }
 
 export async function GET(request: Request) {

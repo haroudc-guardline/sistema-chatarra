@@ -36,6 +36,8 @@ export async function GET(request: Request) {
   const shouldQueryVehicles = !category || category === 'vehicle'
   const shouldQueryAcUnits = !category || category === 'ac_unit'
   const shouldQueryTools = !category || category === 'tool'
+  const shouldQueryInmuebles = !category || category === 'inmueble'
+  const shouldQueryParts = !category || category === 'part'
 
   // Query vehicles
   if (shouldQueryVehicles) {
@@ -116,6 +118,62 @@ export async function GET(request: Request) {
           valor: (t.valor as number) ?? 0,
           location_name: ((t.location as Record<string, unknown>)?.nombre_institucion as string) ?? '',
           location_id: t.location_id as number,
+        }))
+      )
+    }
+  }
+
+  // Query inmuebles
+  if (shouldQueryInmuebles) {
+    let q = supabase
+      .from('stock_inmuebles')
+      .select('id, nombre, valor, location_id, inmueble_type:inmueble_types(nombre), location:locations(nombre_institucion)')
+      .limit(50)
+
+    if (search) q = q.ilike('nombre', `%${search}%`)
+    if (locationId) q = q.eq('location_id', parseInt(locationId))
+
+    const { data } = await q
+    if (data) {
+      results.push(
+        ...data.map((i: Record<string, unknown>) => ({
+          id: i.id as number,
+          item_type: 'inmueble',
+          marca: (i.nombre as string) ?? '',
+          modelo: ((i.inmueble_type as Record<string, unknown>)?.nombre as string) ?? '',
+          identifier: '',
+          tipo_activo: '',
+          valor: (i.valor as number) ?? 0,
+          location_name: ((i.location as Record<string, unknown>)?.nombre_institucion as string) ?? '',
+          location_id: i.location_id as number,
+        }))
+      )
+    }
+  }
+
+  // Query parts (piezas)
+  if (shouldQueryParts) {
+    let q = supabase
+      .from('stock_parts')
+      .select('id, marca, modelo, codigo_marbete, cantidad, location_id, part_type:part_types(nombre), location:locations(nombre_institucion)')
+      .limit(50)
+
+    if (search) q = q.or(`marca.ilike.%${search}%,modelo.ilike.%${search}%,codigo_marbete.ilike.%${search}%`)
+    if (locationId) q = q.eq('location_id', parseInt(locationId))
+
+    const { data } = await q
+    if (data) {
+      results.push(
+        ...data.map((p: Record<string, unknown>) => ({
+          id: p.id as number,
+          item_type: 'part',
+          marca: (p.marca as string) ?? ((p.part_type as Record<string, unknown>)?.nombre as string) ?? '',
+          modelo: (p.modelo as string) ?? '',
+          identifier: (p.codigo_marbete as string) ?? '',
+          tipo_activo: '',
+          valor: 0,
+          location_name: ((p.location as Record<string, unknown>)?.nombre_institucion as string) ?? '',
+          location_id: p.location_id as number,
         }))
       )
     }

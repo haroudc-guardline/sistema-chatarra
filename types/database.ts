@@ -274,9 +274,74 @@ export interface StockTool {
   photos?: StockItemPhoto[]
 }
 
+export interface StockFurniture {
+  id: number
+  location_id: number
+  created_by?: string
+  nombre: string
+  marca?: string
+  modelo?: string
+  numero_serie?: string
+  tipo_mueble?: string
+  material?: string
+  fecha_adquisicion?: string
+  frecuencia_mantenimiento?: string
+  ubicacion_nombre?: string
+  ubicacion_direccion?: string
+  ubicacion_municipio?: string
+  ubicacion_parroquia?: string
+  tipo_activo?: string
+  valor?: number
+  tiene_avaluo?: boolean
+  precio_avaluo?: number
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
+  codigo_marbete?: string
+  estado: string
+  notas?: string
+  created_at: string
+  updated_at?: string
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+  photos?: StockItemPhoto[]
+}
+
+export interface StockElectronic {
+  id: number
+  location_id: number
+  created_by?: string
+  nombre: string
+  marca?: string
+  modelo?: string
+  numero_serie?: string
+  tipo_electronico?: string
+  fecha_adquisicion?: string
+  fecha_garantia?: string
+  sistema_operativo?: string
+  frecuencia_mantenimiento?: string
+  ubicacion_nombre?: string
+  ubicacion_direccion?: string
+  ubicacion_municipio?: string
+  ubicacion_parroquia?: string
+  tipo_activo?: string
+  valor?: number
+  tiene_avaluo?: boolean
+  precio_avaluo?: number
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
+  codigo_marbete?: string
+  estado: string
+  notas?: string
+  created_at: string
+  updated_at?: string
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+  photos?: StockItemPhoto[]
+}
+
 export interface StockItemPhoto {
   id: number
-  item_type: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble'
+  item_type: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble' | 'furniture' | 'electronic' | 'part'
   item_id: number
   file_name: string
   file_path: string
@@ -286,7 +351,7 @@ export interface StockItemPhoto {
   public_url?: string
 }
 
-export type PartCategory = 'vehicle' | 'ac_unit' | 'tool'
+export type PartCategory = 'vehicle' | 'ac_unit' | 'tool' | 'furniture' | 'electronic'
 
 export interface PartType {
   id: number
@@ -350,7 +415,7 @@ export type TipoSalida = 'Venta' | 'Donación' | 'Traspaso' | 'Permuta' | 'Subas
 
 export interface StockExit {
   id: number
-  item_type: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble'
+  item_type: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble' | 'part'
   item_id: number
   location_id: number
   tipo_salida: TipoSalida

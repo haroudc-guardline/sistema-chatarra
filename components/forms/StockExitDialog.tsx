@@ -41,18 +41,22 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Car, Wind, Wrench, Loader2, Search, CheckCircle } from 'lucide-react'
+import { Car, Wind, Wrench, Building2, Cog, Loader2, Search, CheckCircle } from 'lucide-react'
 
 const ITEM_TYPE_ICON: Record<string, typeof Car> = {
   vehicle: Car,
   ac_unit: Wind,
   tool: Wrench,
+  inmueble: Building2,
+  part: Cog,
 }
 
 const ITEM_TYPE_LABEL: Record<string, string> = {
-  vehicle: 'Vehiculo',
+  vehicle: 'Vehículo',
   ac_unit: 'A/C',
   tool: 'Herramienta',
+  inmueble: 'Inmueble',
+  part: 'Pieza',
 }
 
 const exitFormSchema = z.object({
@@ -148,7 +152,7 @@ export default function StockExitDialog({ open, onClose }: StockExitDialogProps)
     if (!selectedItem) return
 
     await create.mutateAsync({
-      item_type: selectedItem.item_type as 'vehicle' | 'ac_unit' | 'tool',
+      item_type: selectedItem.item_type as 'vehicle' | 'ac_unit' | 'tool' | 'inmueble' | 'part',
       item_id: selectedItem.id,
       location_id: selectedItem.location_id,
       tipo_salida: values.tipo_salida as any,
@@ -190,6 +194,8 @@ export default function StockExitDialog({ open, onClose }: StockExitDialogProps)
                   <SelectItem value="vehicle">Vehículo</SelectItem>
                   <SelectItem value="ac_unit">Aire Acondicionado</SelectItem>
                   <SelectItem value="tool">Herramienta</SelectItem>
+                  <SelectItem value="inmueble">Inmueble</SelectItem>
+                  <SelectItem value="part">Pieza</SelectItem>
                 </SelectContent>
               </Select>
               <div className="relative flex-1">
