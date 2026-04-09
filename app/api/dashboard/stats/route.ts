@@ -122,10 +122,15 @@ export async function GET() {
       )
     }
 
-    // Descarte: locations count
+    // Descarte: locations count + geographic distribution
     const { count: ubicacionesCount } = await supabase
       .from('locations')
       .select('*', { count: 'exact', head: true })
+    const { data: locationGeo } = await supabase
+      .from('locations')
+      .select('ciudad, municipio')
+    const ciudadesSet = new Set((locationGeo ?? []).map(l => l.ciudad).filter(Boolean))
+    const municipiosSet = new Set((locationGeo ?? []).map(l => l.municipio).filter(Boolean))
 
     // Descarte: waste_items aggregation
     const { data: wasteItems } = await supabase
@@ -139,6 +144,53 @@ export async function GET() {
       }),
       { volumen: 0, peso: 0, valor: 0 }
     )
+
+    // Waste items by type (for chart)
+    const { data: wasteByTypeRaw } = await supabase
+      .from('waste_items')
+      .select('waste_type_id, volume, weight, value')
+    const { data: wasteTypes } = await supabase
+      .from('waste_types')
+      .select('id, nombre')
+    const wasteTypeMap: Record<number, string> = {}
+    for (const wt of wasteTypes ?? []) {
+      wasteTypeMap[wt.id] = wt.nombre
+    }
+    const wasteByTypeAgg: Record<string, { nombre: string; count: number; weight: number; value: number }> = {}
+    for (const item of wasteByTypeRaw ?? []) {
+      const nombre = wasteTypeMap[item.waste_type_id] ?? 'Otros'
+      if (!wasteByTypeAgg[nombre]) {
+        wasteByTypeAgg[nombre] = { nombre, count: 0, weight: 0, value: 0 }
+      }
+      wasteByTypeAgg[nombre].count += 1
+      wasteByTypeAgg[nombre].weight += item.weight ?? 0
+      wasteByTypeAgg[nombre].value += item.value ?? 0
+    }
+    const wasteByType = Object.values(wasteByTypeAgg).sort((a, b) => b.weight - a.weight)
+
+    // Activity from audit logs
+    const { count: auditTotal } = await supabase
+      .from('audit_logs')
+      .select('*', { count: 'exact', head: true })
+    const { data: auditActions } = await supabase
+      .from('audit_logs')
+      .select('action')
+    const creates = (auditActions ?? []).filter(a => a.action === 'CREATE').length
+    const updates = (auditActions ?? []).filter(a => a.action === 'UPDATE').length
+
+    // Parts totals
+    const { data: vParts } = await supabase.from('vehicle_parts').select('cantidad')
+    const { data: aParts } = await supabase.from('ac_unit_parts').select('cantidad')
+    const { data: tParts } = await supabase.from('tool_parts').select('cantidad')
+    const totalParts =
+      (vParts ?? []).reduce((s, r) => s + (r.cantidad ?? 0), 0) +
+      (aParts ?? []).reduce((s, r) => s + (r.cantidad ?? 0), 0) +
+      (tParts ?? []).reduce((s, r) => s + (r.cantidad ?? 0), 0)
+
+    // Grand totals
+    const totalStockValue = vehiculosValor + airesValor + herramientasValor + fincasValor + terrenosValor + edificiosValor
+    const totalStockItems = (vehiculosCount ?? 0) + (airesCount ?? 0) + (herramientasCount ?? 0) + fincasCount + terrenosCount + edificiosCount
+    const totalDescarteItems = (wasteItems ?? []).length
 
     return NextResponse.json({
       stock: {
@@ -154,6 +206,26 @@ export async function GET() {
         volumen: descarte.volumen,
         peso: descarte.peso,
         valor: descarte.valor,
+      },
+      summary: {
+        grandTotal: totalStockValue + descarte.valor,
+        totalStockValue,
+        totalStockItems,
+        totalDescarteItems,
+      },
+      wasteByType,
+      activity: {
+        total: auditTotal ?? 0,
+        creates,
+        updates,
+      },
+      geography: {
+        locations: ubicacionesCount ?? 0,
+        cities: ciudadesSet.size,
+        municipios: municipiosSet.size,
+      },
+      parts: {
+        total: totalParts,
       },
     })
   } catch (err) {

@@ -193,7 +193,21 @@
   .animate-slide-up {
     animation: slideUp 0.5s ease-out;
   }
-  
+
+  /* Animated gradient background */
+  .animate-gradient {
+    background-size: 400% 400%;
+    animation: gradient-shift 20s ease infinite;
+  }
+
+  /* Staggered card entrance animations */
+  .animate-stagger-1 { animation: slideUp 0.5s ease-out 0.05s both; }
+  .animate-stagger-2 { animation: slideUp 0.5s ease-out 0.1s both; }
+  .animate-stagger-3 { animation: slideUp 0.5s ease-out 0.15s both; }
+  .animate-stagger-4 { animation: slideUp 0.5s ease-out 0.2s both; }
+  .animate-stagger-5 { animation: slideUp 0.5s ease-out 0.25s both; }
+  .animate-stagger-6 { animation: slideUp 0.5s ease-out 0.3s both; }
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -201,5 +215,12 @@
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 100% 50%; }
+    50% { background-position: 100% 0%; }
+    75% { background-position: 0% 100%; }
+    100% { background-position: 0% 50%; }
   }
 }
