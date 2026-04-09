@@ -300,6 +300,7 @@ export interface StockPart {
   id: number
   part_type_id: number
   location_id: number
+  marbete_id?: number
   marca?: string
   modelo?: string
   cantidad: number
@@ -317,6 +318,26 @@ export interface StockPart {
   updated_at?: string
   part_type?: PartType
   location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+}
+
+export interface Marbete {
+  id: number
+  codigo: string
+  category: PartCategory
+  location_id: number
+  responsable_nombre?: string
+  responsable_telefono?: string
+  responsable_email?: string
+  ubicacion_nombre?: string
+  ubicacion_direccion?: string
+  ubicacion_municipio?: string
+  notas?: string
+  created_by?: string
+  created_at: string
+  updated_at?: string
+  location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
+  parts?: StockPart[]
+  parts_count?: number
 }
 
 export type VehiclePart = StockPart
