@@ -19,6 +19,7 @@ export async function GET(request: Request) {
   const activoTypeId = searchParams.get('activo_type_id')
   const avaluo = searchParams.get('avaluo')
   const registro = searchParams.get('registro')
+  const planosActualizados = searchParams.get('planos_actualizados')
   const search = searchParams.get('search')
   const ciudad = searchParams.get('ciudad')
   const municipio = searchParams.get('municipio')
@@ -39,6 +40,7 @@ export async function GET(request: Request) {
   if (activoTypeId) query = query.eq('activo_type_id', parseInt(activoTypeId))
   if (avaluo) query = query.eq('avaluo', avaluo)
   if (registro) query = query.eq('registro', registro)
+  if (planosActualizados) query = query.eq('planos_actualizados', planosActualizados)
   if (search) query = query.ilike('nombre', `%${search}%`)
 
   if (municipio || nombreInstitucion || ciudad) {

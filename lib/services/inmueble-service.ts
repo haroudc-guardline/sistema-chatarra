@@ -5,6 +5,7 @@ export interface InmuebleSearchFilters {
   activo_type_id?: number
   avaluo?: string
   registro?: string
+  planos_actualizados?: string
   search?: string
   ciudad?: string
   municipio?: string

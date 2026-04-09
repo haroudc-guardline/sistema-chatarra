@@ -43,6 +43,7 @@ interface InmuebleFilters {
   municipio?: string
   avaluo?: string
   registro?: string
+  planos_actualizados?: string
 }
 
 export default function InmueblesPage() {
@@ -65,6 +66,7 @@ export default function InmueblesPage() {
     municipio: filters.municipio,
     avaluo: filters.avaluo,
     registro: filters.registro,
+    planos_actualizados: filters.planos_actualizados,
     page,
     limit: PAGE_SIZE,
   })
@@ -276,6 +278,24 @@ export default function InmueblesPage() {
                     <Select
                       value={filters.registro || 'all'}
                       onValueChange={(v) => handleFilterChange('registro', v === 'all' ? undefined : v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Todos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="Si">Si</SelectItem>
+                        <SelectItem value="No">No</SelectItem>
+                        <SelectItem value="En proceso">En proceso</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs">Planos Actualizados</Label>
+                    <Select
+                      value={filters.planos_actualizados || 'all'}
+                      onValueChange={(v) => handleFilterChange('planos_actualizados', v === 'all' ? undefined : v)}
                     >
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="Todos" />

@@ -26,6 +26,8 @@ export async function GET(request: Request) {
   const subcategoria = searchParams.get('subcategoria')
   const quality = searchParams.get('quality')
   const locationId = searchParams.get('location_id')
+  const nombreInstitucion = searchParams.get('nombre_institucion')
+  const municipio = searchParams.get('municipio')
   const search = searchParams.get('search')
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '25')
@@ -74,6 +76,18 @@ export async function GET(request: Request) {
   }
   if (search) {
     query = query.ilike('subcategoria', `%${search}%`)
+  }
+
+  if (municipio || nombreInstitucion) {
+    let locQuery = supabase.from('locations').select('id')
+    if (municipio) locQuery = locQuery.eq('municipio', municipio)
+    if (nombreInstitucion) locQuery = locQuery.eq('nombre_institucion', nombreInstitucion)
+    const { data: locs } = await locQuery
+    if (locs?.length) {
+      query = query.in('location_id', locs.map((l) => l.id))
+    } else {
+      return NextResponse.json({ data: [], count: 0 })
+    }
   }
 
   query = query.range(offset, offset + limit - 1)

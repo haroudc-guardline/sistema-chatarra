@@ -43,6 +43,7 @@ export default function AiresPage() {
     tipo_ac: filters.tipo_ac,
     search: filters.search,
     municipio: filters.municipio,
+    nombre_institucion: filters.nombre_institucion,
     page,
     limit: PAGE_SIZE,
   })
@@ -52,6 +53,11 @@ export default function AiresPage() {
 
   const municipios = useMemo(() => {
     const set = new Set((locations || []).map((l) => l.municipio).filter(Boolean))
+    return Array.from(set).sort()
+  }, [locations])
+
+  const instituciones = useMemo(() => {
+    const set = new Set((locations || []).map((l) => l.nombre_institucion).filter(Boolean))
     return Array.from(set).sort()
   }, [locations])
 
@@ -150,7 +156,7 @@ export default function AiresPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
-          <StockFilterPanel category="aires" filters={filters} municipios={municipios} onFiltersChange={handleFiltersChange} />
+          <StockFilterPanel category="aires" filters={filters} municipios={municipios} instituciones={instituciones} onFiltersChange={handleFiltersChange} />
         </div>
 
         <div className="lg:col-span-3">

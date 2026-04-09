@@ -29,6 +29,7 @@ interface StockFilterPanelProps {
   category: 'autos' | 'aires' | 'herramientas'
   filters: StockFilters
   municipios: string[]
+  instituciones: string[]
   onFiltersChange: (filters: StockFilters) => void
 }
 
@@ -39,7 +40,7 @@ const VEHICLE_ESTADOS = ['Activo', 'En reparación', 'Fuera de servicio', 'Dado 
 const OTROS_ESTADOS = ['Operativo', 'En reparación', 'Fuera de servicio', 'Dado de baja']
 const TIPO_ACTIVO_OPTIONS = ['Activo nuevo', 'Activo usado', 'Activo por Permuta y Donación']
 
-export function StockFilterPanel({ category, filters, municipios, onFiltersChange }: StockFilterPanelProps) {
+export function StockFilterPanel({ category, filters, municipios, instituciones, onFiltersChange }: StockFilterPanelProps) {
   const activeCount = Object.values(filters).filter(Boolean).length
 
   const handleReset = () => {
@@ -167,16 +168,26 @@ export function StockFilterPanel({ category, filters, municipios, onFiltersChang
           </Select>
         </div>
 
-        {/* Nombre Institución */}
-        <div className="space-y-2">
-          <Label className="text-xs text-slate-500">Institución</Label>
-          <Input
-            placeholder="Buscar institución..."
-            value={filters.nombre_institucion || ''}
-            onChange={(e) => onFiltersChange({ ...filters, nombre_institucion: e.target.value || undefined })}
-            className="text-sm"
-          />
-        </div>
+        {/* Institución */}
+        {instituciones.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-xs text-slate-500">Institución</Label>
+            <Select
+              value={filters.nombre_institucion || 'all'}
+              onValueChange={(v) => onFiltersChange({ ...filters, nombre_institucion: v === 'all' ? undefined : v })}
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Todas las instituciones" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las instituciones</SelectItem>
+                {instituciones.map((inst) => (
+                  <SelectItem key={inst} value={inst}>{inst}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

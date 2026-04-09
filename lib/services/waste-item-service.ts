@@ -6,6 +6,8 @@ export interface WasteItemSearchFilters {
   subcategoria?: string
   quality?: string
   location_id?: number
+  nombre_institucion?: string
+  municipio?: string
   search?: string
   page?: number
   limit?: number
@@ -21,6 +23,8 @@ export const wasteItemService = {
     if (filters.subcategoria) params.set('subcategoria', filters.subcategoria)
     if (filters.quality) params.set('quality', filters.quality)
     if (filters.location_id) params.set('location_id', filters.location_id.toString())
+    if (filters.nombre_institucion) params.set('nombre_institucion', filters.nombre_institucion)
+    if (filters.municipio) params.set('municipio', filters.municipio)
     if (filters.search) params.set('search', filters.search)
     if (filters.page) params.set('page', filters.page.toString())
     if (filters.limit) params.set('limit', filters.limit.toString())

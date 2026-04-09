@@ -22,6 +22,8 @@ export interface CreateMarbeteData {
   codigo: string
   category: PartCategory
   location_id: number
+  marca?: string
+  modelo?: string
   responsable_nombre?: string
   responsable_telefono?: string
   responsable_email?: string

@@ -43,6 +43,7 @@ export default function AutosPage() {
     tipo_vehiculo: filters.tipo_vehiculo,
     search: filters.search,
     municipio: filters.municipio,
+    nombre_institucion: filters.nombre_institucion,
     page,
     limit: PAGE_SIZE,
   })
@@ -55,6 +56,11 @@ export default function AutosPage() {
     return Array.from(set).sort()
   }, [locations])
 
+  const instituciones = useMemo(() => {
+    const set = new Set((locations || []).map((l) => l.nombre_institucion).filter(Boolean))
+    return Array.from(set).sort()
+  }, [locations])
+
   const stats = useMemo(() => ({
     total: totalCount,
     activos: items.filter((i) => i.estado === 'Activo').length,
@@ -64,6 +70,14 @@ export default function AutosPage() {
       const d = new Date(i.fecha_revisado)
       const now = new Date()
       const diff = (d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      return diff >= 0 && diff <= 30
+    }).length,
+    proximoServicio: items.filter((i) => {
+      if (!i.fecha_revisado || !i.frecuencia_mantenimiento) return false
+      const d = new Date(i.fecha_revisado)
+      const months: Record<string, number> = { Mensual: 1, Trimestral: 3, Semestral: 6, Anual: 12 }
+      d.setMonth(d.getMonth() + (months[i.frecuencia_mantenimiento] || 12))
+      const diff = (d.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
       return diff >= 0 && diff <= 30
     }).length,
   }), [items, totalCount])
@@ -126,7 +140,7 @@ export default function AutosPage() {
         <TabsContent value="stock">
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
             <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -171,6 +185,17 @@ export default function AutosPage() {
             </div>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
+              <Wrench className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Próximo a Servicio</p>
+              <p className="font-semibold text-slate-900">{stats.proximoServicio}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -180,6 +205,7 @@ export default function AutosPage() {
             category="autos"
             filters={filters}
             municipios={municipios}
+            instituciones={instituciones}
             onFiltersChange={handleFiltersChange}
           />
         </div>
