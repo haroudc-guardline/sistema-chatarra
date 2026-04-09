@@ -27,20 +27,18 @@ import type { PartCategory, Location, Marbete } from '@/types/database'
 
 const ESTADO_OPTIONS = ['Disponible', 'En uso', 'Dañada', 'Dado de baja'] as const
 
-// Schema for a single part row
 const partRowSchema = z.object({
   part_type_id: z.number().min(1, 'Requerido'),
-  marca: z.string().optional(),
-  modelo: z.string().optional(),
   cantidad: z.number().min(1, 'Min. 1'),
   estado: z.string().min(1, 'Requerido'),
   notas: z.string().optional(),
 })
 
-// Schema for the marbete (shared info) - step 1
 const marbeteSchema = z.object({
   codigo: z.string().min(1, 'El código de marbete es requerido'),
   location_id: z.number().min(1, 'La institución es requerida'),
+  marca: z.string().optional(),
+  modelo: z.string().optional(),
   responsable_nombre: z.string().optional(),
   responsable_telefono: z.string().optional(),
   responsable_email: z.string().email('Email inválido').optional().or(z.literal('')),
@@ -50,13 +48,7 @@ const marbeteSchema = z.object({
   notas: z.string().optional(),
 })
 
-// Combined schema for the full form
-const fullSchema = marbeteSchema.extend({
-  parts: z.array(partRowSchema).min(1, 'Debe agregar al menos una pieza'),
-})
-
 type MarbeteFormData = z.infer<typeof marbeteSchema>
-type FullFormData = z.infer<typeof fullSchema>
 
 interface AddMarbeteDialogProps {
   open: boolean
@@ -66,6 +58,8 @@ interface AddMarbeteDialogProps {
   onSuccess: () => void
   /** If provided, skip step 1 and go directly to adding parts */
   existingMarbete?: Marbete
+  /** Start in "existing marbete" search mode (for "Agregar Piezas" button) */
+  startInExistingMode?: boolean
 }
 
 export function AddMarbeteDialog({
@@ -75,12 +69,15 @@ export function AddMarbeteDialog({
   locations,
   onSuccess,
   existingMarbete,
+  startInExistingMode,
 }: AddMarbeteDialogProps) {
   const [step, setStep] = useState<1 | 2>(existingMarbete ? 2 : 1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedMarbete, setSelectedMarbete] = useState<Marbete | null>(existingMarbete ?? null)
-  const [marbeteMode, setMarbeteMode] = useState<'new' | 'existing'>('new')
+  const [marbeteMode, setMarbeteMode] = useState<'new' | 'existing'>(
+    existingMarbete || startInExistingMode ? 'existing' : 'new'
+  )
   const [marbeteSearch, setMarbeteSearch] = useState('')
   const [addingNewType, setAddingNewType] = useState(false)
   const [newTypeName, setNewTypeName] = useState('')
@@ -99,6 +96,8 @@ export function AddMarbeteDialog({
     resolver: zodResolver(marbeteSchema),
     defaultValues: {
       codigo: '',
+      marca: '',
+      modelo: '',
       responsable_nombre: '',
       responsable_telefono: '',
       responsable_email: '',
@@ -109,10 +108,10 @@ export function AddMarbeteDialog({
     },
   })
 
-  // Step 2 form: parts list
+  // Step 2 form: parts list (simplified - no marca/modelo per part)
   const partsForm = useForm<{ parts: z.infer<typeof partRowSchema>[] }>({
     defaultValues: {
-      parts: [{ part_type_id: 0, marca: '', modelo: '', cantidad: 1, estado: 'Disponible', notas: '' }],
+      parts: [{ part_type_id: 0, cantidad: 1, estado: 'Disponible', notas: '' }],
     },
   })
 
@@ -120,6 +119,19 @@ export function AddMarbeteDialog({
     control: partsForm.control,
     name: 'parts',
   })
+
+  // Auto-populate ubicación when location changes
+  const watchedLocationId = marbeteForm.watch('location_id')
+  useEffect(() => {
+    if (watchedLocationId && marbeteMode === 'new') {
+      const loc = locations.find((l) => l.id === watchedLocationId)
+      if (loc) {
+        marbeteForm.setValue('ubicacion_nombre', loc.nombre_institucion || '')
+        marbeteForm.setValue('ubicacion_direccion', loc.direccion || '')
+        marbeteForm.setValue('ubicacion_municipio', loc.municipio || '')
+      }
+    }
+  }, [watchedLocationId, locations, marbeteMode, marbeteForm])
 
   // Reset all state when dialog opens/closes
   useEffect(() => {
@@ -129,6 +141,10 @@ export function AddMarbeteDialog({
         setStep(2)
         setSelectedMarbete(existingMarbete)
         setMarbeteMode('existing')
+      } else if (startInExistingMode) {
+        setStep(1)
+        setSelectedMarbete(null)
+        setMarbeteMode('existing')
       } else {
         setStep(1)
         setSelectedMarbete(null)
@@ -136,13 +152,13 @@ export function AddMarbeteDialog({
         marbeteForm.reset()
       }
       partsForm.reset({
-        parts: [{ part_type_id: 0, marca: '', modelo: '', cantidad: 1, estado: 'Disponible', notas: '' }],
+        parts: [{ part_type_id: 0, cantidad: 1, estado: 'Disponible', notas: '' }],
       })
       setMarbeteSearch('')
       setAddingNewType(false)
       setNewTypeName('')
     }
-  }, [open, existingMarbete, marbeteForm, partsForm])
+  }, [open, existingMarbete, startInExistingMode, marbeteForm, partsForm])
 
   const handleSelectExistingMarbete = useCallback((marbete: Marbete) => {
     setSelectedMarbete(marbete)
@@ -165,7 +181,6 @@ export function AddMarbeteDialog({
     }
   }
 
-  // Proceed from step 1 to step 2
   const handleNextStep = async () => {
     if (marbeteMode === 'existing' && selectedMarbete) {
       setStep(2)
@@ -173,16 +188,13 @@ export function AddMarbeteDialog({
       return
     }
 
-    // Validate marbete form for new marbete
     const valid = await marbeteForm.trigger()
     if (!valid) return
     setStep(2)
     setError(null)
   }
 
-  // Submit: create marbete (if new) + create parts
   const handleSubmit = async () => {
-    // Validate parts
     const partsValid = await partsForm.trigger()
     if (!partsValid) return
 
@@ -197,13 +209,11 @@ export function AddMarbeteDialog({
 
     try {
       if (marbeteMode === 'existing' && selectedMarbete) {
-        // Add parts to existing marbete
         await addParts.mutateAsync({
           marbeteId: selectedMarbete.id,
           parts: partsData,
         })
       } else {
-        // Create new marbete + parts
         const marbeteData = marbeteForm.getValues()
         await createMarbete.mutateAsync({
           ...marbeteData,
@@ -221,7 +231,10 @@ export function AddMarbeteDialog({
     }
   }
 
-  const watchedLocation = marbeteForm.watch('location_id')
+  // Determine the marca/modelo to show in step 2 summary
+  const summaryMarca = selectedMarbete
+    ? [selectedMarbete.marca, selectedMarbete.modelo].filter(Boolean).join(' ')
+    : [marbeteForm.getValues('marca'), marbeteForm.getValues('modelo')].filter(Boolean).join(' ')
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -291,6 +304,7 @@ export function AddMarbeteDialog({
               </div>
             )}
 
+            {/* ── Existing marbete search ── */}
             {marbeteMode === 'existing' && !existingMarbete && (
               <div className="space-y-3">
                 <div className="relative">
@@ -314,17 +328,29 @@ export function AddMarbeteDialog({
                         }`}
                         onClick={() => handleSelectExistingMarbete(m)}
                       >
-                        <CardContent className="p-3 flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-800">{m.codigo}</p>
-                            <p className="text-xs text-slate-500">
-                              {m.location?.nombre_institucion || '—'}
-                              {m.responsable_nombre && ` · ${m.responsable_nombre}`}
-                            </p>
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-800">{m.codigo}</p>
+                              <p className="text-xs text-slate-500">
+                                {m.location?.nombre_institucion || '—'}
+                                {m.marca && ` · ${[m.marca, m.modelo].filter(Boolean).join(' ')}`}
+                                {m.responsable_nombre && ` · ${m.responsable_nombre}`}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs">
+                              {m.parts_count ?? 0} pieza{(m.parts_count ?? 0) !== 1 ? 's' : ''}
+                            </Badge>
                           </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {m.parts_count ?? 0} pieza{(m.parts_count ?? 0) !== 1 ? 's' : ''}
-                          </Badge>
+                          {/* Show inherited info when selected */}
+                          {selectedMarbete?.id === m.id && (
+                            <div className="mt-2 pt-2 border-t border-slate-200 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-500">
+                              {m.marca && <p><span className="font-medium">Marca/Modelo:</span> {[m.marca, m.modelo].filter(Boolean).join(' ')}</p>}
+                              {m.responsable_nombre && <p><span className="font-medium">Responsable:</span> {m.responsable_nombre}</p>}
+                              {m.ubicacion_nombre && <p><span className="font-medium">Ubicación:</span> {[m.ubicacion_nombre, m.ubicacion_municipio].filter(Boolean).join(', ')}</p>}
+                              {m.responsable_telefono && <p><span className="font-medium">Tel:</span> {m.responsable_telefono}</p>}
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
@@ -333,10 +359,15 @@ export function AddMarbeteDialog({
                   <p className="text-sm text-slate-400 text-center py-4">
                     No se encontraron marbetes con &quot;{marbeteSearch}&quot;
                   </p>
-                ) : null}
+                ) : (
+                  <p className="text-sm text-slate-400 text-center py-4">
+                    Escribe para buscar un marbete existente
+                  </p>
+                )}
               </div>
             )}
 
+            {/* ── New marbete form ── */}
             {marbeteMode === 'new' && (
               <div className="space-y-5">
                 {/* Código de Marbete */}
@@ -357,7 +388,7 @@ export function AddMarbeteDialog({
                 <div className="space-y-2">
                   <Label>Institución <span className="text-red-500">*</span></Label>
                   <InstitutionSelect
-                    value={watchedLocation}
+                    value={watchedLocationId}
                     onChange={(id) => marbeteForm.setValue('location_id', id)}
                     error={!!marbeteForm.formState.errors.location_id}
                     locations={locations}
@@ -365,6 +396,18 @@ export function AddMarbeteDialog({
                   {marbeteForm.formState.errors.location_id && (
                     <p className="text-xs text-red-500">{marbeteForm.formState.errors.location_id.message}</p>
                   )}
+                </div>
+
+                {/* Marca / Modelo (shared for all parts) */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Marca</Label>
+                    <Input {...marbeteForm.register('marca')} placeholder="Ej: Toyota, Samsung..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Modelo</Label>
+                    <Input {...marbeteForm.register('modelo')} placeholder="Ej: Corolla, AR12..." />
+                  </div>
                 </div>
 
                 {/* Responsable */}
@@ -389,9 +432,14 @@ export function AddMarbeteDialog({
                   </div>
                 </div>
 
-                {/* Ubicación */}
+                {/* Ubicación (auto-populated from location) */}
                 <div>
-                  <p className="text-sm font-medium text-slate-700 mb-3">Ubicación</p>
+                  <p className="text-sm font-medium text-slate-700 mb-1">Ubicación</p>
+                  {watchedLocationId ? (
+                    <p className="text-xs text-slate-400 mb-3">Heredado de la institución seleccionada. Puedes modificar si es necesario.</p>
+                  ) : (
+                    <p className="text-xs text-slate-400 mb-3">Selecciona una institución para auto-completar.</p>
+                  )}
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label>Nombre</Label>
@@ -421,9 +469,9 @@ export function AddMarbeteDialog({
         {/* ─── STEP 2: Parts list ─── */}
         {step === 2 && (
           <div className="space-y-4">
-            {/* Marbete summary */}
+            {/* Marbete summary card */}
             <Card className="bg-slate-50/80 border-slate-200">
-              <CardContent className="p-3">
+              <CardContent className="p-3 space-y-1">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Tag className="h-4 w-4 text-blue-600" />
@@ -438,9 +486,20 @@ export function AddMarbeteDialog({
                     }
                   </span>
                 </div>
-                {selectedMarbete?.responsable_nombre && (
-                  <p className="text-xs text-slate-500 mt-1">
-                    Responsable: {selectedMarbete.responsable_nombre}
+                {summaryMarca && (
+                  <p className="text-xs text-slate-500">Marca/Modelo: {summaryMarca}</p>
+                )}
+                {(selectedMarbete?.responsable_nombre || marbeteForm.getValues('responsable_nombre')) && (
+                  <p className="text-xs text-slate-500">
+                    Responsable: {selectedMarbete?.responsable_nombre || marbeteForm.getValues('responsable_nombre')}
+                  </p>
+                )}
+                {(selectedMarbete?.ubicacion_municipio || marbeteForm.getValues('ubicacion_municipio')) && (
+                  <p className="text-xs text-slate-500">
+                    Ubicación: {[
+                      selectedMarbete?.ubicacion_nombre || marbeteForm.getValues('ubicacion_nombre'),
+                      selectedMarbete?.ubicacion_municipio || marbeteForm.getValues('ubicacion_municipio'),
+                    ].filter(Boolean).join(', ')}
                   </p>
                 )}
               </CardContent>
@@ -455,7 +514,7 @@ export function AddMarbeteDialog({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => append({ part_type_id: 0, marca: '', modelo: '', cantidad: 1, estado: 'Disponible', notas: '' })}
+                onClick={() => append({ part_type_id: 0, cantidad: 1, estado: 'Disponible', notas: '' })}
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Agregar Pieza
@@ -498,12 +557,12 @@ export function AddMarbeteDialog({
               </div>
             )}
 
-            {/* Part rows */}
+            {/* Part rows - simplified: only tipo, cantidad, estado */}
             <div className="space-y-3 max-h-[45vh] overflow-y-auto pr-1">
               {fields.map((field, index) => (
                 <Card key={field.id} className="border-slate-200">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                         Pieza {index + 1}
                       </span>
@@ -520,7 +579,6 @@ export function AddMarbeteDialog({
                       )}
                     </div>
 
-                    {/* Row 1: Tipo + Cantidad + Estado */}
                     <div className="grid grid-cols-6 gap-3">
                       <div className="col-span-3 space-y-1">
                         <Label className="text-xs">Tipo de Pieza <span className="text-red-500">*</span></Label>
@@ -578,18 +636,6 @@ export function AddMarbeteDialog({
                         </Select>
                       </div>
                     </div>
-
-                    {/* Row 2: Marca + Modelo */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Marca</Label>
-                        <Input {...partsForm.register(`parts.${index}.marca`)} placeholder="Ej: Toyota, Samsung..." />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Modelo</Label>
-                        <Input {...partsForm.register(`parts.${index}.modelo`)} placeholder="Ej: Corolla, AR12..." />
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -600,7 +646,7 @@ export function AddMarbeteDialog({
               type="button"
               variant="outline"
               className="w-full border-dashed border-slate-300 text-slate-500 hover:text-slate-700 hover:border-slate-400"
-              onClick={() => append({ part_type_id: 0, marca: '', modelo: '', cantidad: 1, estado: 'Disponible', notas: '' })}
+              onClick={() => append({ part_type_id: 0, cantidad: 1, estado: 'Disponible', notas: '' })}
             >
               <Plus className="h-4 w-4 mr-2" />
               Agregar otra pieza

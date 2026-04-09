@@ -84,6 +84,11 @@ function MarbeteRow({
             {[marbete.location?.ciudad, marbete.location?.municipio].filter(Boolean).join(', ')}
           </p>
         </td>
+        <td className="px-4 py-3">
+          <p className="text-sm text-slate-700">
+            {[marbete.marca, marbete.modelo].filter(Boolean).join(' ') || '—'}
+          </p>
+        </td>
         <td className="px-4 py-3 text-center">
           <Badge variant="secondary" className="text-xs">
             {marbete.parts_count ?? 0} pieza{(marbete.parts_count ?? 0) !== 1 ? 's' : ''}
@@ -128,7 +133,7 @@ function MarbeteRow({
       {/* Expanded: show parts */}
       {expanded && (
         <tr>
-          <td colSpan={6} className="bg-slate-50/50 px-0 py-0">
+          <td colSpan={7 + ((isAdmin || isOperador) ? 1 : 0)} className="bg-slate-50/50 px-0 py-0">
             {isLoading ? (
               <div className="flex items-center justify-center py-6">
                 <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
@@ -202,6 +207,7 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
   const [editItem, setEditItem] = useState<StockPart | undefined>()
   const [marbeteDialogOpen, setMarbeteDialogOpen] = useState(false)
   const [addPartsToMarbete, setAddPartsToMarbete] = useState<Marbete | undefined>()
+  const [startInExistingMode, setStartInExistingMode] = useState(false)
 
   const { partTypes } = usePartTypes(category)
 
@@ -405,20 +411,26 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
 
           {(isAdmin || isOperador) && (
             <div className="flex items-center gap-2 ml-auto">
-              {viewMode === 'piezas' && (
-                <Button
-                  variant="outline"
-                  onClick={() => { setEditItem(undefined); setDialogOpen(true) }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Pieza Suelta
-                </Button>
-              )}
               <Button
-                onClick={() => { setAddPartsToMarbete(undefined); setMarbeteDialogOpen(true) }}
+                variant="outline"
+                onClick={() => {
+                  setAddPartsToMarbete(undefined)
+                  setStartInExistingMode(true)
+                  setMarbeteDialogOpen(true)
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Piezas
+              </Button>
+              <Button
+                onClick={() => {
+                  setAddPartsToMarbete(undefined)
+                  setStartInExistingMode(false)
+                  setMarbeteDialogOpen(true)
+                }}
               >
                 <Tag className="h-4 w-4 mr-2" />
-                {viewMode === 'marbetes' ? 'Nuevo Marbete + Piezas' : 'Agregar por Marbete'}
+                Nuevo Marbete + Piezas
               </Button>
             </div>
           )}
@@ -457,6 +469,7 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
                       <tr className="border-b border-slate-100 bg-slate-50/50">
                         <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Código Marbete</th>
                         <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Institución</th>
+                        <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Marca / Modelo</th>
                         <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Piezas</th>
                         <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Responsable</th>
                         <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Ubicación</th>
@@ -655,12 +668,16 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
         open={marbeteDialogOpen}
         onOpenChange={(open) => {
           setMarbeteDialogOpen(open)
-          if (!open) setAddPartsToMarbete(undefined)
+          if (!open) {
+            setAddPartsToMarbete(undefined)
+            setStartInExistingMode(false)
+          }
         }}
         category={category}
         locations={locations}
         onSuccess={handleRefreshAll}
         existingMarbete={addPartsToMarbete}
+        startInExistingMode={startInExistingMode}
       />
     </div>
   )

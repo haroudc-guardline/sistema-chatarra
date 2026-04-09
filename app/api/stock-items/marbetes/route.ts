@@ -116,6 +116,8 @@ export async function POST(request: Request) {
         location_id: marbeteData.location_id,
         marbete_id: marbete.id,
         codigo_marbete: marbeteData.codigo,
+        marca: marbeteData.marca || p.marca,
+        modelo: marbeteData.modelo || p.modelo,
         responsable_nombre: marbeteData.responsable_nombre,
         responsable_telefono: marbeteData.responsable_telefono,
         responsable_email: marbeteData.responsable_email,
