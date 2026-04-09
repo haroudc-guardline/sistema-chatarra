@@ -101,12 +101,11 @@ export default function InmueblesPage() {
   }
 
   const handleEdit = (item: StockInmueble) => {
-    // For now navigate to the add page — detail/edit page can be added later
-    alert(`Editar inmueble #${item.id} - ${item.nombre}`)
+    router.push(`/inventory/stock/inmuebles/${item.id}`)
   }
 
   const handleLey7RowClick = (item: StockInmueble) => {
-    alert(`Detalle del inmueble #${item.id} - ${item.nombre}. Pagina de detalle proximamente.`)
+    router.push(`/inventory/stock/inmuebles/${item.id}`)
   }
 
   const handleExportLey7 = useCallback(async () => {
@@ -329,7 +328,7 @@ export default function InmueblesPage() {
                           </thead>
                           <tbody>
                             {items.map((item: StockInmueble) => (
-                              <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                              <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => router.push(`/inventory/stock/inmuebles/${item.id}`)}>
                                 <td className="px-4 py-3">
                                   <p className="text-sm font-medium text-slate-700 truncate max-w-[180px]">{item.nombre}</p>
                                 </td>
@@ -381,7 +380,7 @@ export default function InmueblesPage() {
                                   </Badge>
                                 </td>
                                 {(isAdmin || isOperador) && (
-                                  <td className="px-4 py-3 text-center">
+                                  <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
                                     <div className="flex items-center justify-center gap-1">
                                       <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleEdit(item)}>
                                         Editar

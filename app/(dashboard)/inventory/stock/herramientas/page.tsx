@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useToolSearch, useToolMutations } from '@/hooks/useStockItems'
 import { useLocations } from '@/hooks/useLocations'
 import { useAuth } from '@/hooks/useAuth'
@@ -27,6 +28,7 @@ const ESTADO_COLORS: Record<string, string> = {
 const PAGE_SIZE = 25
 
 export default function HerramientasPage() {
+  const router = useRouter()
   const { isAdmin, isOperador } = useAuth()
   const { locations } = useLocations()
   const [page, setPage] = useState(1)
@@ -177,7 +179,7 @@ export default function HerramientasPage() {
                       </thead>
                       <tbody>
                         {items.map((item: StockTool) => (
-                          <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                          <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => router.push(`/inventory/stock/herramientas/${item.id}`)}>
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-1.5">
                                 <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
@@ -202,7 +204,7 @@ export default function HerramientasPage() {
                               <Badge className={`text-xs ${ESTADO_COLORS[item.estado] || 'bg-slate-100 text-slate-700'}`}>{item.estado}</Badge>
                             </td>
                             {(isAdmin || isOperador) && (
-                              <td className="px-4 py-3 text-center">
+                              <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
                                 <div className="flex items-center justify-center gap-1">
                                   <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleEdit(item)}>Editar</Button>
                                   <Button variant="ghost" size="sm" className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(item.id)}>Eliminar</Button>

@@ -58,6 +58,12 @@ export const inmuebleService = {
     return res.json()
   },
 
+  async getInmueble(id: number): Promise<StockInmueble> {
+    const res = await fetch(`/api/stock-items/inmuebles/${id}`)
+    if (!res.ok) throw new Error('Error al obtener inmueble')
+    return res.json()
+  },
+
   async deleteInmueble(id: number): Promise<void> {
     const res = await fetch(`/api/stock-items/inmuebles/${id}`, { method: 'DELETE' })
     if (!res.ok) {

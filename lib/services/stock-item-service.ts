@@ -84,6 +84,12 @@ export const stockItemService = {
     return res.json()
   },
 
+  async getVehicle(id: number): Promise<StockVehicle> {
+    const res = await fetch(`/api/stock-items/autos/${id}`)
+    if (!res.ok) throw new Error('Error al obtener vehículo')
+    return res.json()
+  },
+
   async deleteVehicle(id: number): Promise<void> {
     const res = await fetch(`/api/stock-items/autos/${id}`, { method: 'DELETE' })
     if (!res.ok) {
@@ -126,6 +132,12 @@ export const stockItemService = {
     return res.json()
   },
 
+  async getAcUnit(id: number): Promise<StockAcUnit> {
+    const res = await fetch(`/api/stock-items/aires/${id}`)
+    if (!res.ok) throw new Error('Error al obtener aire acondicionado')
+    return res.json()
+  },
+
   async deleteAcUnit(id: number): Promise<void> {
     const res = await fetch(`/api/stock-items/aires/${id}`, { method: 'DELETE' })
     if (!res.ok) {
@@ -165,6 +177,12 @@ export const stockItemService = {
       const err = await res.json()
       throw new Error(err.error || 'Error al actualizar herramienta')
     }
+    return res.json()
+  },
+
+  async getTool(id: number): Promise<StockTool> {
+    const res = await fetch(`/api/stock-items/herramientas/${id}`)
+    if (!res.ok) throw new Error('Error al obtener herramienta')
     return res.json()
   },
 
