@@ -41,6 +41,7 @@ interface InmuebleFilters {
   search?: string
   ciudad?: string
   municipio?: string
+  nombre_institucion?: string
   avaluo?: string
   registro?: string
   planos_actualizados?: string
@@ -51,6 +52,17 @@ export default function InmueblesPage() {
   const { isAdmin, isOperador } = useAuth()
   const { locations } = useLocations()
   const { types: inmuebleTypes } = useInmuebleTypes()
+
+  const instituciones = useMemo(() => {
+    const set = new Set((locations || []).map((l) => l.nombre_institucion).filter(Boolean))
+    return Array.from(set).sort()
+  }, [locations])
+
+  const municipios = useMemo(() => {
+    const set = new Set((locations || []).map((l) => l.municipio).filter(Boolean))
+    return Array.from(set).sort()
+  }, [locations])
+
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<InmuebleFilters>({})
   const [activeTab, setActiveTab] = useState('inventario')
@@ -64,6 +76,7 @@ export default function InmueblesPage() {
     search: filters.search,
     ciudad: filters.ciudad,
     municipio: filters.municipio,
+    nombre_institucion: filters.nombre_institucion,
     avaluo: filters.avaluo,
     registro: filters.registro,
     planos_actualizados: filters.planos_actualizados,
@@ -247,12 +260,38 @@ export default function InmueblesPage() {
 
                   <div className="space-y-2">
                     <Label className="text-xs">Municipio</Label>
-                    <Input
-                      value={filters.municipio || ''}
-                      onChange={(e) => handleFilterChange('municipio', e.target.value || undefined)}
-                      placeholder="Municipio..."
-                      className="h-8 text-xs"
-                    />
+                    <Select
+                      value={filters.municipio || 'all'}
+                      onValueChange={(v) => handleFilterChange('municipio', v === 'all' ? undefined : v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Todos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        {municipios.map((m) => (
+                          <SelectItem key={m} value={m}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs">Institución</Label>
+                    <Select
+                      value={filters.nombre_institucion || 'all'}
+                      onValueChange={(v) => handleFilterChange('nombre_institucion', v === 'all' ? undefined : v)}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Todas" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas</SelectItem>
+                        {instituciones.map((inst) => (
+                          <SelectItem key={inst} value={inst}>{inst}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">

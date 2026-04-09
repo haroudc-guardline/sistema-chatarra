@@ -35,16 +35,28 @@ const PAGE_SIZE = 25
 
 export default function InventoryDescartePage() {
   const router = useRouter()
-  const { wasteTypes } = useLocations()
+  const { wasteTypes, locations } = useLocations()
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState<{
     subcategoria?: string
     waste_type_id?: number
     quality?: string
     zona?: number
+    nombre_institucion?: string
+    municipio?: string
   }>({})
 
-  const handleFiltersChange = (newFilters: { subcategoria?: string; waste_type_id?: number; quality?: string; zona?: number }) => {
+  const instituciones = useMemo(() => {
+    const set = new Set((locations || []).map((l) => l.nombre_institucion).filter(Boolean))
+    return Array.from(set).sort()
+  }, [locations])
+
+  const municipios = useMemo(() => {
+    const set = new Set((locations || []).map((l) => l.municipio).filter(Boolean))
+    return Array.from(set).sort()
+  }, [locations])
+
+  const handleFiltersChange = (newFilters: { subcategoria?: string; waste_type_id?: number; quality?: string; zona?: number; nombre_institucion?: string; municipio?: string }) => {
     setFilters(newFilters)
     setPage(1)
   }
@@ -54,6 +66,8 @@ export default function InventoryDescartePage() {
     subcategoria: filters.subcategoria || undefined,
     waste_type_id: filters.waste_type_id,
     quality: filters.quality,
+    nombre_institucion: filters.nombre_institucion,
+    municipio: filters.municipio,
     page,
     limit: PAGE_SIZE,
   })
@@ -131,6 +145,8 @@ export default function InventoryDescartePage() {
           <WasteItemFilterPanel
             wasteTypes={wasteTypes || []}
             filters={filters}
+            instituciones={instituciones}
+            municipios={municipios}
             onFiltersChange={handleFiltersChange}
           />
         </div>

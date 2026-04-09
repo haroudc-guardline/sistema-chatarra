@@ -26,11 +26,15 @@ interface WasteItemFilters {
   waste_type_id?: number
   quality?: string
   zona?: number
+  nombre_institucion?: string
+  municipio?: string
 }
 
 interface WasteItemFilterPanelProps {
   wasteTypes: WasteType[]
   filters: WasteItemFilters
+  instituciones: string[]
+  municipios: string[]
   onFiltersChange: (filters: WasteItemFilters) => void
 }
 
@@ -42,16 +46,18 @@ const QUALITY_OPTIONS = [
   { value: 'Deficiente', label: 'Deficiente' },
 ]
 
-export function WasteItemFilterPanel({ wasteTypes, filters, onFiltersChange }: WasteItemFilterPanelProps) {
+export function WasteItemFilterPanel({ wasteTypes, filters, instituciones, municipios, onFiltersChange }: WasteItemFilterPanelProps) {
   const activeFilterCount = [
     filters.subcategoria,
     filters.waste_type_id,
     filters.quality,
     filters.zona,
+    filters.nombre_institucion,
+    filters.municipio,
   ].filter(Boolean).length
 
   const handleReset = () => {
-    onFiltersChange({ subcategoria: undefined, waste_type_id: undefined, quality: undefined, zona: undefined })
+    onFiltersChange({ subcategoria: undefined, waste_type_id: undefined, quality: undefined, zona: undefined, nombre_institucion: undefined, municipio: undefined })
   }
 
   return (
@@ -96,6 +102,52 @@ export function WasteItemFilterPanel({ wasteTypes, filters, onFiltersChange }: W
             </SelectContent>
           </Select>
         </div>
+
+        {/* Institution filter */}
+        {instituciones.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-xs text-slate-500">Institución</Label>
+            <Select
+              value={filters.nombre_institucion || 'all'}
+              onValueChange={(value) =>
+                onFiltersChange({ ...filters, nombre_institucion: value === 'all' ? undefined : value })
+              }
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Todas las instituciones" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las instituciones</SelectItem>
+                {instituciones.map((inst) => (
+                  <SelectItem key={inst} value={inst}>{inst}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Municipality filter */}
+        {municipios.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-xs text-slate-500">Municipio</Label>
+            <Select
+              value={filters.municipio || 'all'}
+              onValueChange={(value) =>
+                onFiltersChange({ ...filters, municipio: value === 'all' ? undefined : value })
+              }
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Todos los municipios" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los municipios</SelectItem>
+                {municipios.map((m) => (
+                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Subcategory filter */}
         <div className="space-y-2">
