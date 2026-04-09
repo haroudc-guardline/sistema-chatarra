@@ -1,4 +1,4 @@
-import type { StockVehicle, StockAcUnit, StockTool, StockItemPhoto } from '@/types/database'
+import type { StockVehicle, StockAcUnit, StockTool, StockFurniture, StockElectronic, StockItemPhoto } from '@/types/database'
 
 // ─── Vehicles ────────────────────────────────────────────────────────────────
 
@@ -31,6 +31,30 @@ export interface ToolSearchFilters {
   location_id?: number
   estado?: string
   tipo_herramienta?: string
+  tipo_activo?: string
+  nombre_institucion?: string
+  search?: string
+  municipio?: string
+  page?: number
+  limit?: number
+}
+
+export interface FurnitureSearchFilters {
+  location_id?: number
+  estado?: string
+  tipo_mueble?: string
+  tipo_activo?: string
+  nombre_institucion?: string
+  search?: string
+  municipio?: string
+  page?: number
+  limit?: number
+}
+
+export interface ElectronicSearchFilters {
+  location_id?: number
+  estado?: string
+  tipo_electronico?: string
   tipo_activo?: string
   nombre_institucion?: string
   search?: string
@@ -194,8 +218,104 @@ export const stockItemService = {
     }
   },
 
+  // Furniture
+  async searchFurniture(filters: FurnitureSearchFilters): Promise<{ data: StockFurniture[]; count: number }> {
+    const params = buildParams(filters as Record<string, string | number | undefined>)
+    const res = await fetch(`/api/stock-items/muebles?${params}`)
+    if (!res.ok) throw new Error('Error al buscar muebles')
+    return res.json()
+  },
+
+  async createFurniture(data: Partial<StockFurniture>): Promise<StockFurniture> {
+    const res = await fetch('/api/stock-items/muebles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Error al crear mueble')
+    }
+    return res.json()
+  },
+
+  async updateFurniture(id: number, data: Partial<StockFurniture>): Promise<StockFurniture> {
+    const res = await fetch(`/api/stock-items/muebles/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Error al actualizar mueble')
+    }
+    return res.json()
+  },
+
+  async getFurniture(id: number): Promise<StockFurniture> {
+    const res = await fetch(`/api/stock-items/muebles/${id}`)
+    if (!res.ok) throw new Error('Error al obtener mueble')
+    return res.json()
+  },
+
+  async deleteFurniture(id: number): Promise<void> {
+    const res = await fetch(`/api/stock-items/muebles/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Error al eliminar mueble')
+    }
+  },
+
+  // Electronics
+  async searchElectronics(filters: ElectronicSearchFilters): Promise<{ data: StockElectronic[]; count: number }> {
+    const params = buildParams(filters as Record<string, string | number | undefined>)
+    const res = await fetch(`/api/stock-items/materiales-electricos?${params}`)
+    if (!res.ok) throw new Error('Error al buscar materiales eléctricos')
+    return res.json()
+  },
+
+  async createElectronic(data: Partial<StockElectronic>): Promise<StockElectronic> {
+    const res = await fetch('/api/stock-items/materiales-electricos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Error al crear material eléctrico')
+    }
+    return res.json()
+  },
+
+  async updateElectronic(id: number, data: Partial<StockElectronic>): Promise<StockElectronic> {
+    const res = await fetch(`/api/stock-items/materiales-electricos/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Error al actualizar material eléctrico')
+    }
+    return res.json()
+  },
+
+  async getElectronic(id: number): Promise<StockElectronic> {
+    const res = await fetch(`/api/stock-items/materiales-electricos/${id}`)
+    if (!res.ok) throw new Error('Error al obtener material eléctrico')
+    return res.json()
+  },
+
+  async deleteElectronic(id: number): Promise<void> {
+    const res = await fetch(`/api/stock-items/materiales-electricos/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Error al eliminar material eléctrico')
+    }
+  },
+
   // Photos
-  async uploadPhotos(itemType: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble', itemId: number, files: File[]): Promise<StockItemPhoto[]> {
+  async uploadPhotos(itemType: 'vehicle' | 'ac_unit' | 'tool' | 'inmueble' | 'furniture' | 'electronic', itemId: number, files: File[]): Promise<StockItemPhoto[]> {
     const formData = new FormData()
     formData.append('item_type', itemType)
     formData.append('item_id', itemId.toString())
@@ -216,7 +336,7 @@ export const stockItemService = {
     }
   },
 
-  async getPhotos(itemType: 'vehicle' | 'ac_unit' | 'tool', itemId: number): Promise<StockItemPhoto[]> {
+  async getPhotos(itemType: 'vehicle' | 'ac_unit' | 'tool' | 'furniture' | 'electronic', itemId: number): Promise<StockItemPhoto[]> {
     const res = await fetch(`/api/stock-items/photos?item_type=${itemType}&item_id=${itemId}`)
     if (!res.ok) throw new Error('Error al obtener fotos')
     return res.json()

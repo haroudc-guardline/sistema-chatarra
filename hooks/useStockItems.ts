@@ -6,6 +6,8 @@ import {
   type VehicleSearchFilters,
   type AcUnitSearchFilters,
   type ToolSearchFilters,
+  type FurnitureSearchFilters,
+  type ElectronicSearchFilters,
 } from '@/lib/services/stock-item-service'
 
 export function useVehicleSearch(filters: VehicleSearchFilters) {
@@ -116,6 +118,82 @@ export function useToolMutations() {
 
   const remove = useMutation({
     mutationFn: stockItemService.deleteTool,
+    onSuccess: invalidate,
+  })
+
+  return { create, update, remove }
+}
+
+export function useFurnitureSearch(filters: FurnitureSearchFilters) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['stockFurniture', filters],
+    queryFn: () => stockItemService.searchFurniture(filters),
+    staleTime: 30 * 1000,
+  })
+  return {
+    items: data?.data ?? [],
+    totalCount: data?.count ?? 0,
+    isLoading,
+    error,
+    refetch,
+  }
+}
+
+export function useFurnitureMutations() {
+  const queryClient = useQueryClient()
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['stockFurniture'] })
+
+  const create = useMutation({
+    mutationFn: stockItemService.createFurniture,
+    onSuccess: invalidate,
+  })
+
+  const update = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof stockItemService.updateFurniture>[1] }) =>
+      stockItemService.updateFurniture(id, data),
+    onSuccess: invalidate,
+  })
+
+  const remove = useMutation({
+    mutationFn: stockItemService.deleteFurniture,
+    onSuccess: invalidate,
+  })
+
+  return { create, update, remove }
+}
+
+export function useElectronicSearch(filters: ElectronicSearchFilters) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['stockElectronics', filters],
+    queryFn: () => stockItemService.searchElectronics(filters),
+    staleTime: 30 * 1000,
+  })
+  return {
+    items: data?.data ?? [],
+    totalCount: data?.count ?? 0,
+    isLoading,
+    error,
+    refetch,
+  }
+}
+
+export function useElectronicMutations() {
+  const queryClient = useQueryClient()
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['stockElectronics'] })
+
+  const create = useMutation({
+    mutationFn: stockItemService.createElectronic,
+    onSuccess: invalidate,
+  })
+
+  const update = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Parameters<typeof stockItemService.updateElectronic>[1] }) =>
+      stockItemService.updateElectronic(id, data),
+    onSuccess: invalidate,
+  })
+
+  const remove = useMutation({
+    mutationFn: stockItemService.deleteElectronic,
     onSuccess: invalidate,
   })
 

@@ -21,12 +21,14 @@ export interface StockFilters {
   tipo_vehiculo?: string
   tipo_ac?: string
   tipo_herramienta?: string
+  tipo_mueble?: string
+  tipo_electronico?: string
   tipo_activo?: string
   nombre_institucion?: string
 }
 
 interface StockFilterPanelProps {
-  category: 'autos' | 'aires' | 'herramientas'
+  category: 'autos' | 'aires' | 'herramientas' | 'muebles' | 'materiales-electricos'
   filters: StockFilters
   municipios: string[]
   instituciones: string[]
@@ -36,6 +38,8 @@ interface StockFilterPanelProps {
 const VEHICLE_TIPOS = ['Sedan', 'Camioneta', 'SUV', 'Bus', 'Camión', 'Motocicleta', 'Van', 'Otro']
 const AC_TIPOS = ['Split', 'Central', 'Ventana', 'Portátil', 'Mini Split', 'Otro']
 const TOOL_TIPOS = ['Taladro', 'Sierra', 'Esmeriladora', 'Compresor', 'Soldadora', 'Lijadora', 'Generador', 'Otro']
+const FURNITURE_TIPOS = ['Escritorio', 'Mesa', 'Silla', 'Estante', 'Archivo', 'Gabinete', 'Sofá', 'Otro']
+const ELECTRONIC_TIPOS = ['Laptop', 'Computadora de Escritorio', 'Celular', 'Tablet', 'Impresora', 'Monitor', 'Proyector', 'Router', 'UPS', 'Otro']
 const VEHICLE_ESTADOS = ['Activo', 'En reparación', 'Fuera de servicio', 'Dado de baja']
 const OTROS_ESTADOS = ['Operativo', 'En reparación', 'Fuera de servicio', 'Dado de baja']
 const TIPO_ACTIVO_OPTIONS = ['Activo nuevo', 'Activo usado', 'Activo por Permuta y Donación']
@@ -48,10 +52,21 @@ export function StockFilterPanel({ category, filters, municipios, instituciones,
   }
 
   const estados = category === 'autos' ? VEHICLE_ESTADOS : OTROS_ESTADOS
-  const tipos = category === 'autos' ? VEHICLE_TIPOS : category === 'aires' ? AC_TIPOS : TOOL_TIPOS
-  const tipoKey = category === 'autos' ? 'tipo_vehiculo' : category === 'aires' ? 'tipo_ac' : 'tipo_herramienta'
-  const tipoLabel =
-    category === 'autos' ? 'Tipo de Vehículo' : category === 'aires' ? 'Tipo de A/C' : 'Tipo de Herramienta'
+  const tipos = category === 'autos' ? VEHICLE_TIPOS
+    : category === 'aires' ? AC_TIPOS
+    : category === 'muebles' ? FURNITURE_TIPOS
+    : category === 'materiales-electricos' ? ELECTRONIC_TIPOS
+    : TOOL_TIPOS
+  const tipoKey = category === 'autos' ? 'tipo_vehiculo'
+    : category === 'aires' ? 'tipo_ac'
+    : category === 'muebles' ? 'tipo_mueble'
+    : category === 'materiales-electricos' ? 'tipo_electronico'
+    : 'tipo_herramienta'
+  const tipoLabel = category === 'autos' ? 'Tipo de Vehículo'
+    : category === 'aires' ? 'Tipo de A/C'
+    : category === 'muebles' ? 'Tipo de Mueble'
+    : category === 'materiales-electricos' ? 'Tipo de Equipo'
+    : 'Tipo de Herramienta'
 
   return (
     <Card>
@@ -80,6 +95,8 @@ export function StockFilterPanel({ category, filters, municipios, instituciones,
             placeholder={
               category === 'autos' ? 'Marca, modelo, placa...' :
               category === 'aires' ? 'Marca, modelo, serie...' :
+              category === 'muebles' ? 'Nombre, marca, tipo...' :
+              category === 'materiales-electricos' ? 'Nombre, marca, modelo...' :
               'Nombre, marca, modelo...'
             }
             value={filters.search || ''}

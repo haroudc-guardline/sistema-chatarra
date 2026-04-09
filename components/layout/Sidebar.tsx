@@ -43,6 +43,11 @@ const navItems: NavItem[] = [
     icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
+    href: '/inventory',
+    label: 'Inventario',
+    icon: <Package className="h-5 w-5" />,
+  },
+  {
     href: '/map',
     label: 'Mapa',
     icon: <Map className="h-5 w-5" />,
@@ -51,11 +56,6 @@ const navItems: NavItem[] = [
     href: '/locations',
     label: 'Ubicaciones',
     icon: <Building2 className="h-5 w-5" />,
-  },
-  {
-    href: '/inventory',
-    label: 'Inventario',
-    icon: <Package className="h-5 w-5" />,
   },
   {
     href: '/users',

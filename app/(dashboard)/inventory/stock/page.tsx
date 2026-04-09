@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Card, CardContent } from '@/components/ui/card'
-import { Car, Wind, Wrench, Building, ArrowRight } from 'lucide-react'
+import { Car, Wind, Wrench, Building, Armchair, Laptop, ArrowRight } from 'lucide-react'
 
 const CATEGORIES = [
   {
@@ -46,6 +46,26 @@ const CATEGORIES = [
     blur1: 'bg-white/10',
     blur2: 'bg-purple-400/20',
   },
+  {
+    href: '/inventory/stock/muebles',
+    icon: Armchair,
+    title: 'Muebles',
+    description: 'Registro de escritorios, mesas, sillas y mobiliario',
+    gradient: 'from-green-600/90 via-green-700/85 to-emerald-900/90',
+    bgImage: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=2070&auto=format&fit=crop',
+    blur1: 'bg-white/10',
+    blur2: 'bg-green-400/20',
+  },
+  {
+    href: '/inventory/stock/materiales-electricos',
+    icon: Laptop,
+    title: 'Materiales Eléctricos',
+    description: 'Control de laptops, celulares, impresoras y equipos',
+    gradient: 'from-pink-600/90 via-pink-700/85 to-rose-900/90',
+    bgImage: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2070&auto=format&fit=crop',
+    blur1: 'bg-white/10',
+    blur2: 'bg-pink-400/20',
+  },
 ]
 
 export default function StockLandingPage() {
@@ -60,7 +80,7 @@ export default function StockLandingPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {CATEGORIES.map(({ href, icon: Icon, title, description, gradient, bgImage, blur1, blur2 }) => (
           <Link key={href} href={href} className="group">
             <Card className="relative overflow-hidden rounded-2xl border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-full group-hover:-translate-y-1">
