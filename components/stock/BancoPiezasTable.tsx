@@ -6,6 +6,8 @@ import { useMarbeteSearch, useMarbeteMutations, useMarbeteDetail } from '@/hooks
 import { useAuth } from '@/hooks/useAuth'
 import { AddPartDialog } from '@/components/forms/AddPartDialog'
 import { AddMarbeteDialog } from '@/components/forms/AddMarbeteDialog'
+import { MarbeteDetailDialog } from '@/components/stock/MarbeteDetailDialog'
+import { PartDetailDialog } from '@/components/stock/PartDetailDialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -47,6 +49,7 @@ function MarbeteRow({
   isOperador,
   onAddParts,
   onDeleteMarbete,
+  onViewDetail,
 }: {
   marbete: Marbete
   category: PartCategory
@@ -54,6 +57,7 @@ function MarbeteRow({
   isOperador: boolean
   onAddParts: (m: Marbete) => void
   onDeleteMarbete: (id: number) => void
+  onViewDetail: (m: Marbete) => void
 }) {
   const [expanded, setExpanded] = useState(false)
   const { marbete: detail, isLoading } = useMarbeteDetail(expanded ? marbete.id : null)
@@ -105,29 +109,39 @@ function MarbeteRow({
             {[marbete.ubicacion_nombre, marbete.ubicacion_municipio].filter(Boolean).join(', ') || '—'}
           </p>
         </td>
-        {(isAdmin || isOperador) && (
-          <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => onAddParts(marbete)}
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Piezas
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                onClick={() => onDeleteMarbete(marbete.id)}
-              >
-                Eliminar
-              </Button>
-            </div>
-          </td>
-        )}
+        <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => onViewDetail(marbete)}
+            >
+              Ver
+            </Button>
+            {(isAdmin || isOperador) && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => onAddParts(marbete)}
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Piezas
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => onDeleteMarbete(marbete.id)}
+                >
+                  Eliminar
+                </Button>
+              </>
+            )}
+          </div>
+        </td>
       </tr>
 
       {/* Expanded: show parts */}
@@ -208,6 +222,8 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
   const [marbeteDialogOpen, setMarbeteDialogOpen] = useState(false)
   const [addPartsToMarbete, setAddPartsToMarbete] = useState<Marbete | undefined>()
   const [startInExistingMode, setStartInExistingMode] = useState(false)
+  const [detailMarbete, setDetailMarbete] = useState<Marbete | null>(null)
+  const [detailPart, setDetailPart] = useState<StockPart | null>(null)
 
   const { partTypes } = usePartTypes(category)
 
@@ -473,9 +489,7 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
                         <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Piezas</th>
                         <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Responsable</th>
                         <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Ubicación</th>
-                        {(isAdmin || isOperador) && (
-                          <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Acciones</th>
-                        )}
+                        <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -491,6 +505,7 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
                             setMarbeteDialogOpen(true)
                           }}
                           onDeleteMarbete={handleDeleteMarbete}
+                          onViewDetail={(marbete) => setDetailMarbete(marbete)}
                         />
                       ))}
                     </tbody>
@@ -553,14 +568,16 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
                         <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Estado</th>
                         <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Marbete</th>
                         <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Responsable</th>
-                        {(isAdmin || isOperador) && (
-                          <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Acciones</th>
-                        )}
+                        <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.map((item: StockPart) => (
-                        <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                        <tr
+                          key={item.id}
+                          className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                          onClick={() => setDetailPart(item)}
+                        >
                           <td className="px-4 py-3">
                             <span className="text-sm font-medium text-slate-700">
                               {item.part_type?.nombre || '—'}
@@ -603,23 +620,28 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
                               <p className="text-xs text-slate-400">{item.responsable_telefono}</p>
                             )}
                           </td>
-                          {(isAdmin || isOperador) && (
-                            <td className="px-4 py-3 text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleEdit(item)}>
-                                  Editar
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  onClick={() => handleDelete(item.id)}
-                                >
-                                  Eliminar
-                                </Button>
-                              </div>
-                            </td>
-                          )}
+                          <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-center gap-1">
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setDetailPart(item)}>
+                                Ver
+                              </Button>
+                              {(isAdmin || isOperador) && (
+                                <>
+                                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleEdit(item)}>
+                                    Editar
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    onClick={() => handleDelete(item.id)}
+                                  >
+                                    Eliminar
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -678,6 +700,38 @@ export function BancoPiezasTable({ category, locations }: BancoPiezasTableProps)
         onSuccess={handleRefreshAll}
         existingMarbete={addPartsToMarbete}
         startInExistingMode={startInExistingMode}
+      />
+
+      <MarbeteDetailDialog
+        open={!!detailMarbete}
+        onOpenChange={(open) => { if (!open) setDetailMarbete(null) }}
+        marbete={detailMarbete}
+        category={category}
+        locations={locations}
+        onAddParts={(m) => {
+          setDetailMarbete(null)
+          setAddPartsToMarbete(m)
+          setMarbeteDialogOpen(true)
+        }}
+        onViewPart={(part) => {
+          setDetailMarbete(null)
+          setDetailPart(part)
+        }}
+        isAdmin={isAdmin}
+        isOperador={isOperador}
+      />
+
+      <PartDetailDialog
+        open={!!detailPart}
+        onOpenChange={(open) => { if (!open) setDetailPart(null) }}
+        part={detailPart}
+        onEdit={(part) => {
+          setDetailPart(null)
+          setEditItem(part)
+          setDialogOpen(true)
+        }}
+        isAdmin={isAdmin}
+        isOperador={isOperador}
       />
     </div>
   )
