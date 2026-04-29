@@ -35,9 +35,9 @@ import {
 const TUTORIAL_STEPS = [
   {
     icon: <Trash2 className="h-10 w-10 text-red-600" />,
-    title: 'Bienvenido al Sistema de Inventario Nacional de Bienes Patrimoniales',
+    title: 'Bienvenido al Sistema Integral de Activos del Estado (SIAE)',
     description:
-      'Este sistema te permite registrar, gestionar y dar seguimiento a los residuos y chatarra en instituciones a nivel nacional. Navega por las diferentes secciones usando el menú lateral.',
+      'SIAE es la plataforma oficial para registrar, gestionar y dar seguimiento a los activos del Estado a nivel nacional. El módulo actual cubre residuos y chatarra. Navega por las diferentes secciones usando el menú lateral.',
   },
   {
     icon: <Building2 className="h-10 w-10 text-blue-600" />,

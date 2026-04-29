@@ -1,5 +1,5 @@
 -- ============================================
--- Sistema de Inventario Nacional de Bienes Patrimoniales - Panamá
+-- SIAE — Sistema Integral de Activos del Estado · Panamá
 -- Database Schema
 -- ============================================
 

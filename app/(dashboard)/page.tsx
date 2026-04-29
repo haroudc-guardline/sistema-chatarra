@@ -335,7 +335,7 @@ export default function DashboardPage() {
             )}
           </div>
           <p className="text-slate-600 text-base pl-[52px]">
-            Panel de control del Sistema de Inventario Nacional de Bienes Patrimoniales
+            Panel de control — SIAE (Sistema Integral de Activos del Estado)
           </p>
         </div>
 

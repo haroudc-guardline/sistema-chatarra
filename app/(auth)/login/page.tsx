@@ -98,15 +98,18 @@ export default function SimpleLoginPage() {
             </div>
           </div>
           
-          <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight leading-tight">
-            Sistema de Inventario Nacional de{' '}
+          <h1 className="text-6xl lg:text-7xl font-bold text-white mb-4 tracking-tight leading-none">
             <span className="bg-gradient-to-r from-blue-200 to-emerald-200 bg-clip-text text-transparent">
-              Bienes Patrimoniales
+              SIAE
             </span>
           </h1>
-          
+
+          <p className="text-xl lg:text-2xl font-semibold text-white/95 mb-6 max-w-md leading-tight">
+            Sistema Integral de Activos del Estado
+          </p>
+
           <p className="text-lg text-blue-100/90 mb-8 max-w-md leading-relaxed">
-            Plataforma oficial para la gestión, control y trazabilidad de chatarra y materiales reciclables en la República de Panamá.
+            Plataforma oficial para la gestión, control y trazabilidad de los activos del Estado en la República de Panamá.
           </p>
           
           {/* Feature badges */}
@@ -227,7 +230,7 @@ export default function SimpleLoginPage() {
 
           <div className="text-center mt-8 pt-6 border-t border-slate-200">
             <p className="text-xs text-slate-400">
-              © 2026 Sistema de Inventario Nacional de Bienes Patrimoniales - Panamá
+              © 2026 SIAE — Sistema Integral de Activos del Estado · Panamá
             </p>
             <p className="text-xs text-slate-400 mt-1">
               Todos los derechos reservados

@@ -114,11 +114,11 @@ function SidebarContent({
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-white whitespace-nowrap leading-tight">
-                  Bienes Patrimoniales
+                <span className="text-base font-bold text-white whitespace-nowrap leading-tight tracking-tight">
+                  SIAE
                 </span>
                 <span className="text-[10px] text-slate-400 whitespace-nowrap">
-                  Sistema Nacional
+                  Activos del Estado
                 </span>
               </div>
             )}
@@ -195,7 +195,7 @@ function SidebarContent({
           {!isCollapsed && (
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <Leaf className="h-3 w-3 text-emerald-500" />
-              <span>© 2026 Bienes Patrimoniales PA</span>
+              <span>© 2026 SIAE — Panamá</span>
             </div>
           )}
         </div>

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Plataforma de Administración de Residuos y Chatarra - Panamá",
-  description: "Sistema de gestión de residuos y chatarra para Panamá",
+  title: "SIAE — Sistema Integral de Activos del Estado",
+  description: "Sistema Integral de Activos del Estado (SIAE) — plataforma oficial para la gestión de activos del Estado.",
 };
 
 export default function RootLayout({

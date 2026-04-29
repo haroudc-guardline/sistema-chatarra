@@ -91,12 +91,12 @@ export function Header({ onMenuToggle }: HeaderProps) {
             </div>
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-base font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">
-              Sistema de Inventario Nacional de Bienes Patrimoniales
+            <h1 className="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">
+              SIAE
             </h1>
             <div className="flex items-center gap-1.5 -mt-0.5">
               <Leaf className="h-3 w-3 text-emerald-500" />
-              <p className="text-xs text-slate-500">República de Panamá</p>
+              <p className="text-xs text-slate-500">Sistema Integral de Activos del Estado</p>
             </div>
           </div>
         </div>
