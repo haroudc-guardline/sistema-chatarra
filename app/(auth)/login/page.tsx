@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase/client'
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Trash2, Loader2, ArrowRight, Shield, Leaf, Recycle } from 'lucide-react'
+import { Loader2, ArrowRight, Shield, Leaf, Recycle } from 'lucide-react'
 
 export default function SimpleLoginPage() {
   const router = useRouter()
@@ -86,27 +87,26 @@ export default function SimpleLoginPage() {
           {/* Logo container */}
           <div className="relative mb-8">
             <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full scale-150" />
-            <div className="relative h-24 w-24 bg-gradient-to-br from-red-500 to-red-700 rounded-3xl flex items-center justify-center shadow-2xl shadow-red-500/30 border border-white/20">
-              <Trash2 className="h-12 w-12 text-white" />
-            </div>
+            <Image
+              src="/images/logo_SIAE.png"
+              alt="SIAE — Sistema Integral de Activos del Estado"
+              width={360}
+              height={158}
+              priority
+              className="relative drop-shadow-2xl"
+            />
             {/* Floating icons */}
-            <div className="absolute -top-2 -right-8 h-10 w-10 bg-emerald-500/90 rounded-xl flex items-center justify-center shadow-lg animate-pulse">
+            <div className="absolute -top-4 -right-4 h-10 w-10 bg-emerald-500/90 rounded-xl flex items-center justify-center shadow-lg animate-pulse">
               <Leaf className="h-5 w-5 text-white" />
             </div>
-            <div className="absolute -bottom-2 -left-8 h-10 w-10 bg-blue-500/90 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="absolute -bottom-4 -left-4 h-10 w-10 bg-blue-500/90 rounded-xl flex items-center justify-center shadow-lg">
               <Recycle className="h-5 w-5 text-white" />
             </div>
           </div>
-          
-          <h1 className="text-6xl lg:text-7xl font-bold text-white mb-4 tracking-tight leading-none">
-            <span className="bg-gradient-to-r from-blue-200 to-emerald-200 bg-clip-text text-transparent">
-              SIAE
-            </span>
-          </h1>
 
-          <p className="text-xl lg:text-2xl font-semibold text-white/95 mb-6 max-w-md leading-tight">
+          <h1 className="text-xl lg:text-2xl font-semibold text-white/95 mb-6 max-w-md leading-tight">
             Sistema Integral de Activos del Estado
-          </p>
+          </h1>
 
           <p className="text-lg text-blue-100/90 mb-8 max-w-md leading-relaxed">
             Plataforma oficial para la gestión, control y trazabilidad de los activos del Estado en la República de Panamá.
@@ -142,11 +142,14 @@ export default function SimpleLoginPage() {
         <div className="w-full max-w-md space-y-6">
           <div className="text-center md:text-left">
             <div className="md:hidden flex justify-center mb-6">
-              <div className="relative">
-                <div className="h-16 w-16 bg-gradient-to-br from-red-500 to-red-700 rounded-2xl flex items-center justify-center shadow-xl shadow-red-500/20">
-                  <Trash2 className="h-8 w-8 text-white" />
-                </div>
-              </div>
+              <Image
+                src="/images/logo_SIAE.png"
+                alt="SIAE"
+                width={200}
+                height={88}
+                priority
+                className="h-auto w-48"
+              />
             </div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
               Bienvenido de vuelta

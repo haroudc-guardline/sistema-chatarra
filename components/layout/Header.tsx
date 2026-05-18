@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Bell, Menu, User, LogOut, Settings, Shield, Building2, Leaf } from 'lucide-react'
+import { Bell, Menu, User, LogOut, Settings, Shield, Leaf } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface HeaderProps {
@@ -84,11 +85,16 @@ export function Header({ onMenuToggle }: HeaderProps) {
         
         {/* Logo & Title */}
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-lg" />
-            <div className="relative h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Building2 className="h-5 w-5 text-white" />
-            </div>
+          <div className="relative shrink-0">
+            <div className="absolute inset-0 bg-blue-500/10 blur-lg rounded-lg" />
+            <Image
+              src="/images/logo_SIAE_icon.png"
+              alt="SIAE"
+              width={40}
+              height={40}
+              priority
+              className="relative h-10 w-10 object-contain"
+            />
           </div>
           <div className="hidden sm:block">
             <h1 className="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">

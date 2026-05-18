@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
@@ -106,11 +107,16 @@ function SidebarContent({
           isCollapsed ? "justify-center px-0" : "px-4 justify-between"
         )}>
           <Link href="/" className="flex items-center gap-3" onClick={onItemClick}>
-            <div className="relative">
+            <div className="relative shrink-0">
               <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-full" />
-              <div className="relative h-10 w-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/20">
-                <Building2 className="h-5 w-5 text-white" />
-              </div>
+              <Image
+                src="/images/logo_SIAE_icon.png"
+                alt="SIAE"
+                width={40}
+                height={40}
+                priority
+                className="relative h-10 w-10 object-contain"
+              />
             </div>
             {!isCollapsed && (
               <div className="flex flex-col">

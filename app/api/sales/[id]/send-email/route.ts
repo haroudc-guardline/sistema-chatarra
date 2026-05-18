@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
+import * as fs from 'fs'
+import * as path from 'path'
 import { salesService } from '@/lib/services/sales-service'
+
+const LOGO_CID = 'logo-siae'
+const LOGO_PATH = path.resolve(process.cwd(), 'public/images/logo_SIAE.png')
 
 type RouteContext = { params: Promise<{ id: string }> }
 
@@ -66,6 +71,12 @@ function buildEmailHtml(params: {
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:32px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+    <!-- Logo banner -->
+    <tr>
+      <td style="background:#ffffff;padding:24px 36px 16px;text-align:center;border-bottom:1px solid #f1f5f9;">
+        <img src="cid:${LOGO_CID}" alt="SIAE" width="180" style="display:inline-block;height:auto;max-width:180px;" />
+      </td>
+    </tr>
     <!-- Header -->
     <tr>
       <td style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:32px 36px;">
@@ -227,11 +238,20 @@ export async function POST(request: NextRequest, context: RouteContext) {
         message,
       })
 
+      const logoBuffer = fs.readFileSync(LOGO_PATH)
+
       const { error: emailError } = await resend.emails.send({
         from: 'Sistema Chatarra Panamá <noreply@residuos.pa>',
         to: [buyer_email],
         subject: `Oferta de Chatarra: ${listing.title}`,
         html,
+        attachments: [
+          {
+            filename: 'logo-siae.png',
+            content: logoBuffer,
+            contentId: LOGO_CID,
+          },
+        ],
       })
 
       if (emailError) {
