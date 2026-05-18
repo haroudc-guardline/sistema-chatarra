@@ -45,3 +45,6 @@ Documents/
 
 .vercel
 .env*.local
+
+# logo working/preview files (not for production)
+/public/images/_archive/

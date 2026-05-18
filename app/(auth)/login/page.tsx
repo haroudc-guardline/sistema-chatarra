@@ -84,22 +84,22 @@ export default function SimpleLoginPage() {
         <div className="absolute bottom-20 left-20 w-48 h-48 rounded-full bg-emerald-500/10 blur-3xl" />
         
         <div className="relative z-20 flex flex-col items-center justify-center text-center px-12 max-w-2xl">
-          {/* Logo container */}
+          {/* Logo container with frosted-glass backdrop */}
           <div className="relative mb-8">
-            <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full scale-150" />
+            <div className="absolute -inset-6 bg-white/15 backdrop-blur-md rounded-3xl border border-white/25 shadow-2xl" />
             <Image
               src="/images/logo_SIAE.png"
               alt="SIAE — Sistema Integral de Activos del Estado"
               width={360}
-              height={158}
+              height={201}
               priority
-              className="relative drop-shadow-2xl"
+              className="relative drop-shadow-xl"
             />
             {/* Floating icons */}
-            <div className="absolute -top-4 -right-4 h-10 w-10 bg-emerald-500/90 rounded-xl flex items-center justify-center shadow-lg animate-pulse">
+            <div className="absolute -top-4 -right-4 h-10 w-10 bg-emerald-500/90 rounded-xl flex items-center justify-center shadow-lg animate-pulse z-10">
               <Leaf className="h-5 w-5 text-white" />
             </div>
-            <div className="absolute -bottom-4 -left-4 h-10 w-10 bg-blue-500/90 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="absolute -bottom-4 -left-4 h-10 w-10 bg-blue-500/90 rounded-xl flex items-center justify-center shadow-lg z-10">
               <Recycle className="h-5 w-5 text-white" />
             </div>
           </div>
