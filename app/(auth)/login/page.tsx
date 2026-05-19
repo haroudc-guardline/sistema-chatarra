@@ -88,7 +88,7 @@ export default function SimpleLoginPage() {
           <div className="relative mb-8">
             <div className="absolute -inset-6 bg-white/15 backdrop-blur-md rounded-3xl border border-white/25 shadow-2xl" />
             <Image
-              src="/images/logo_SIAE.png"
+              src="/images/logo_SIAE_dark.png"
               alt="SIAE — Sistema Integral de Activos del Estado"
               width={360}
               height={201}

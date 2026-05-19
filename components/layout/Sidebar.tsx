@@ -110,7 +110,7 @@ function SidebarContent({
             <div className="relative shrink-0">
               <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-full" />
               <Image
-                src="/images/logo_SIAE_icon.png"
+                src="/images/logo_SIAE_icon_dark.png"
                 alt="SIAE"
                 width={40}
                 height={40}
