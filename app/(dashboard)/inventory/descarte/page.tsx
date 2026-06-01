@@ -4,7 +4,9 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useWasteItemSearch } from '@/hooks/useWasteItemSearch'
 import { useLocations } from '@/hooks/useLocations'
+import { useAuth } from '@/hooks/useAuth'
 import { WasteItemFilterPanel } from '@/components/data/WasteItemFilterPanel'
+import { AddWasteItemDialog } from '@/components/waste/AddWasteItemDialog'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,6 +22,7 @@ import {
   Loader2,
   Search,
   MapPin,
+  Plus,
 } from 'lucide-react'
 import type { WasteItemWithLocation } from '@/types/database'
 
@@ -36,7 +39,9 @@ const PAGE_SIZE = 25
 export default function InventoryDescartePage() {
   const router = useRouter()
   const { wasteTypes, locations } = useLocations()
+  const { isOperador } = useAuth()
   const [page, setPage] = useState(1)
+  const [showAddDialog, setShowAddDialog] = useState(false)
   const [filters, setFilters] = useState<{
     subcategoria?: string
     waste_type_id?: number
@@ -61,7 +66,7 @@ export default function InventoryDescartePage() {
     setPage(1)
   }
 
-  const { items, totalCount, isLoading } = useWasteItemSearch({
+  const { items, totalCount, isLoading, refetch } = useWasteItemSearch({
     zona: filters.zona,
     subcategoria: filters.subcategoria || undefined,
     waste_type_id: filters.waste_type_id,
@@ -89,6 +94,18 @@ export default function InventoryDescartePage() {
       <PageHeader
         title="Inventario de Residuos"
         description="Busca y filtra items de residuos a través de todas las ubicaciones"
+        actions={
+          isOperador
+            ? [
+                {
+                  label: 'Agregar Item',
+                  icon: Plus,
+                  primary: true,
+                  onClick: () => setShowAddDialog(true),
+                },
+              ]
+            : undefined
+        }
       />
 
       {/* Summary Stats */}
@@ -293,6 +310,14 @@ export default function InventoryDescartePage() {
           </Card>
         </div>
       </div>
+
+      <AddWasteItemDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        locations={locations || []}
+        wasteTypes={wasteTypes || []}
+        onCreated={() => refetch()}
+      />
     </div>
   )
 }
