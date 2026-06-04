@@ -10,6 +10,23 @@ function createSupabaseClient(cookieStore: Awaited<ReturnType<typeof cookies>>) 
   )
 }
 
+// "Valor que suma" de un inmueble: el avalúo vigente manda; si no, la suma del
+// desglose (terreno + mejoras); si no, el valor capturado manualmente.
+type InmuebleValorRow = {
+  valor?: number | null
+  avaluo_vigente_monto?: number | null
+  valor_terreno?: number | null
+  valor_mejoras?: number | null
+}
+const INMUEBLE_VALOR_SELECT = 'valor, avaluo_vigente_monto, valor_terreno, valor_mejoras'
+function sumInmuebleValor(rows: InmuebleValorRow[] | null): number {
+  return (rows ?? []).reduce((acc, r) => {
+    if (r.avaluo_vigente_monto != null) return acc + r.avaluo_vigente_monto
+    if (r.valor_terreno != null || r.valor_mejoras != null) return acc + (r.valor_terreno ?? 0) + (r.valor_mejoras ?? 0)
+    return acc + (r.valor ?? 0)
+  }, 0)
+}
+
 export async function GET() {
   const cookieStore = await cookies()
   const supabase = createSupabaseClient(cookieStore)
@@ -74,12 +91,9 @@ export async function GET() {
       fincasCount = count ?? 0
       const { data: fincasSum } = await supabase
         .from('stock_inmuebles')
-        .select('valor')
+        .select(INMUEBLE_VALOR_SELECT)
         .eq('inmueble_type_id', fincaTypeId)
-      fincasValor = (fincasSum ?? []).reduce(
-        (acc, r) => acc + (r.valor ?? 0),
-        0
-      )
+      fincasValor = sumInmuebleValor(fincasSum)
     }
 
     // Terrenos
@@ -94,12 +108,9 @@ export async function GET() {
       terrenosCount = count ?? 0
       const { data: terrenosSum } = await supabase
         .from('stock_inmuebles')
-        .select('valor')
+        .select(INMUEBLE_VALOR_SELECT)
         .eq('inmueble_type_id', terrenoTypeId)
-      terrenosValor = (terrenosSum ?? []).reduce(
-        (acc, r) => acc + (r.valor ?? 0),
-        0
-      )
+      terrenosValor = sumInmuebleValor(terrenosSum)
     }
 
     // Edificios
@@ -114,12 +125,9 @@ export async function GET() {
       edificiosCount = count ?? 0
       const { data: edificiosSum } = await supabase
         .from('stock_inmuebles')
-        .select('valor')
+        .select(INMUEBLE_VALOR_SELECT)
         .eq('inmueble_type_id', edificioTypeId)
-      edificiosValor = (edificiosSum ?? []).reduce(
-        (acc, r) => acc + (r.valor ?? 0),
-        0
-      )
+      edificiosValor = sumInmuebleValor(edificiosSum)
     }
 
     // Descarte: locations count + geographic distribution

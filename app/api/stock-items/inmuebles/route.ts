@@ -17,54 +17,39 @@ export async function GET(request: Request) {
 
   const inmuebleTypeId = searchParams.get('inmueble_type_id')
   const activoTypeId = searchParams.get('activo_type_id')
-  const avaluo = searchParams.get('avaluo')
-  const registro = searchParams.get('registro')
-  const planosActualizados = searchParams.get('planos_actualizados')
-  const search = searchParams.get('search')
-  const ciudad = searchParams.get('ciudad')
-  const municipio = searchParams.get('municipio')
-  const nombreInstitucion = searchParams.get('nombre_institucion')
+  const aniosAvaluo = searchParams.get('anios_avaluo')
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '25')
   const offset = (page - 1) * limit
 
-  let query = supabase
-    .from('stock_inmuebles')
-    .select(
-      '*, inmueble_type:inmueble_types(id, nombre), activo_type:inmueble_activo_types(id, nombre), location:locations(id, nombre_institucion, ciudad, municipio)',
-      { count: 'exact' }
-    )
-    .order('created_at', { ascending: false })
+  // Filtro multi-selección de incidencias pendientes (CSV)
+  const pendienteRaw = searchParams.get('pendiente')
+  const pendientes = pendienteRaw ? pendienteRaw.split(',').map((s) => s.trim()).filter(Boolean) : null
 
-  if (inmuebleTypeId) query = query.eq('inmueble_type_id', parseInt(inmuebleTypeId))
-  if (activoTypeId) query = query.eq('activo_type_id', parseInt(activoTypeId))
-  if (avaluo) query = query.eq('avaluo', avaluo)
-  if (registro) query = query.eq('registro', registro)
-  if (planosActualizados) query = query.eq('planos_actualizados', planosActualizados)
-  if (search) query = query.ilike('nombre', `%${search}%`)
-
-  if (municipio || nombreInstitucion || ciudad) {
-    let locQuery = supabase.from('locations').select('id')
-    if (municipio) locQuery = locQuery.eq('municipio', municipio)
-    if (ciudad) locQuery = locQuery.ilike('ciudad', `%${ciudad}%`)
-    if (nombreInstitucion) locQuery = locQuery.ilike('nombre_institucion', `%${nombreInstitucion}%`)
-    const { data: locs } = await locQuery
-    if (locs?.length) {
-      query = query.in('location_id', locs.map((l) => l.id))
-    } else {
-      return NextResponse.json({ data: [], count: 0 })
-    }
-  }
-
-  query = query.range(offset, offset + limit - 1)
-  const { data, error, count } = await query
+  // El RPC search_inmuebles encapsula filtros + completitud + paginación + count
+  const { data, error } = await supabase.rpc('search_inmuebles', {
+    p_inmueble_type_id: inmuebleTypeId ? parseInt(inmuebleTypeId) : null,
+    p_activo_type_id: activoTypeId ? parseInt(activoTypeId) : null,
+    p_avaluo: searchParams.get('avaluo') || null,
+    p_registro: searchParams.get('registro') || null,
+    p_planos: searchParams.get('planos_actualizados') || null,
+    p_search: searchParams.get('search') || null,
+    p_ciudad: searchParams.get('ciudad') || null,
+    p_municipio: searchParams.get('municipio') || null,
+    p_nombre_institucion: searchParams.get('nombre_institucion') || null,
+    p_pendientes: pendientes,
+    p_anios_avaluo: aniosAvaluo ? parseInt(aniosAvaluo) : 3,
+    p_limit: limit,
+    p_offset: offset,
+  })
 
   if (error) {
     console.error('Error fetching inmuebles:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ data: data ?? [], count: count ?? 0 })
+  // El RPC devuelve { data, count }
+  return NextResponse.json({ data: data?.data ?? [], count: data?.count ?? 0 })
 }
 
 export async function POST(request: Request) {

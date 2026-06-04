@@ -18,6 +18,7 @@ import { PlacesAutocomplete } from '@/components/map/PlacesAutocomplete'
 import { useLocations } from '@/hooks/useLocations'
 import { locationService } from '@/lib/services/location-service'
 import { useInmuebleTypes, useInmuebleTypeMutations, useInmuebleActivoTypes, useInmuebleActivoTypeMutations } from '@/hooks/useInmuebles'
+import { TITULAR_TIPOS } from '@/lib/inmueble-constants'
 import type { Location, StockInmueble } from '@/types/database'
 
 const schema = z.object({
@@ -32,6 +33,12 @@ const schema = z.object({
   notas: z.string().optional(),
   activo_type_id: z.number().optional(),
   valor: z.number().optional(),
+  valor_terreno: z.number().optional(),
+  valor_catastral: z.number().optional(),
+  valor_mejoras: z.number().optional(),
+  titular_nombre: z.string().optional(),
+  titular_tipo: z.string().optional(),
+  ministerio: z.string().optional(),
   codigo_marbete: z.string().optional(),
   responsable_nombre: z.string().optional(),
   responsable_telefono: z.string().optional(),
@@ -87,6 +94,12 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
           notas: editItem.notas || '',
           activo_type_id: editItem.activo_type_id ?? undefined,
           valor: editItem.valor ?? undefined,
+          valor_terreno: editItem.valor_terreno ?? undefined,
+          valor_catastral: editItem.valor_catastral ?? undefined,
+          valor_mejoras: editItem.valor_mejoras ?? undefined,
+          titular_nombre: editItem.titular_nombre || '',
+          titular_tipo: editItem.titular_tipo || '',
+          ministerio: editItem.ministerio || '',
           codigo_marbete: editItem.codigo_marbete || '',
           responsable_nombre: editItem.responsable_nombre || '',
           responsable_telefono: editItem.responsable_telefono || '',
@@ -107,6 +120,7 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
     planos_actualizados: watch('planos_actualizados'),
     estado: watch('estado'),
     activo_type_id: watch('activo_type_id'),
+    titular_tipo: watch('titular_tipo'),
   }
 
   const watchedCiudad = watch('ubicacion_ciudad')
@@ -245,6 +259,34 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
             </CardContent>
           </Card>
 
+          {/* Titular y Ministerio */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Titular y Ministerio</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>A nombre de (titular registral)</Label>
+                <Input {...register('titular_nombre')} placeholder="Nombre del titular / propietario" />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo de titular</Label>
+                <Select value={watchedValues.titular_tipo || ''} onValueChange={(v) => setValue('titular_tipo', v)}>
+                  <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                  <SelectContent>
+                    {TITULAR_TIPOS.map((t) => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Ministerio</Label>
+                <Input {...register('ministerio')} placeholder="Ministerio o entidad afiliada" />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Estado Legal */}
           <Card>
             <CardHeader>
@@ -362,13 +404,29 @@ export function InmuebleForm({ locations, onSubmit, onCancel, editItem, isSubmit
               </div>
 
               <div className="space-y-2">
-                <Label>Valor</Label>
+                <Label>Valor (general)</Label>
                 <Input
                   {...register('valor', { valueAsNumber: true })}
                   type="number"
                   step="0.01"
                   placeholder="$0.00"
                 />
+                <p className="text-xs text-slate-400">Si registras un avalúo, ese monto manda en los totales.</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Valor de la tierra</Label>
+                  <Input {...register('valor_terreno', { valueAsNumber: true })} type="number" step="0.01" placeholder="$0.00" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Valor catastral</Label>
+                  <Input {...register('valor_catastral', { valueAsNumber: true })} type="number" step="0.01" placeholder="$0.00" />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <Label>Valor de mejoras (edificio)</Label>
+                  <Input {...register('valor_mejoras', { valueAsNumber: true })} type="number" step="0.01" placeholder="$0.00" />
+                </div>
               </div>
 
               <div className="space-y-2">

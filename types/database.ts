@@ -461,11 +461,22 @@ export interface StockInmueble {
   inmueble_type_id: number
   activo_type_id?: number
   valor?: number
+  // Desglose de valores
+  valor_terreno?: number
+  valor_catastral?: number
+  valor_mejoras?: number
+  // Cache del avalúo vigente (mantenido por trigger)
+  avaluo_vigente_monto?: number
+  avaluo_vigente_fecha?: string
   metros_cuadrados?: number
   avaluo?: string
   registro?: string
   planos_actualizados?: string
   codigo_marbete?: string
+  // Titular registral + ministerio
+  titular_nombre?: string
+  titular_tipo?: string // 'Estado' | 'Persona natural' | 'Persona jurídica' | 'Ministerio'
+  ministerio?: string
   responsable_nombre?: string
   responsable_telefono?: string
   responsable_email?: string
@@ -481,4 +492,100 @@ export interface StockInmueble {
   activo_type?: InmuebleActivoType
   location?: Pick<Location, 'id' | 'nombre_institucion' | 'ciudad' | 'municipio'>
   photos?: StockItemPhoto[]
+  // Relaciones / datos derivados (radiografía y completitud)
+  avaluos?: InmuebleAvaluo[]
+  documents?: InmuebleDocument[]
+  media?: InmuebleMedia[]
+  completitud?: InmuebleCompletitud
+  incidencias?: IncidenciaTipo[]
+}
+
+export interface InmuebleAvaluo {
+  id: number
+  inmueble_id: number
+  monto: number
+  fecha_avaluo: string
+  anio?: number
+  entidad_avaluadora?: string
+  documento_path?: string
+  documento_nombre?: string
+  notas?: string
+  es_actual: boolean
+  created_by?: string
+  created_at: string
+  updated_at?: string
+  public_url?: string
+}
+
+export interface InmuebleDocumentType {
+  id: number
+  nombre: string
+  created_by_user: boolean
+  is_required: boolean
+  orden: number
+  created_at?: string
+}
+
+export interface InmuebleDocument {
+  id: number
+  inmueble_id: number
+  document_type_id: number
+  file_name: string
+  file_path: string
+  file_size: number
+  mime_type: string
+  uploaded_by?: string
+  created_at: string
+  public_url?: string
+  document_type?: InmuebleDocumentType
+}
+
+export type InmuebleMediaCategoria =
+  | 'Fachada' | 'Interiores' | 'Áreas comunes' | 'Pasillos' | 'Elevadores' | 'Vista aérea' | 'Otra'
+
+export interface InmuebleMedia {
+  id: number
+  inmueble_id: number
+  media_type: 'image' | 'video'
+  categoria: InmuebleMediaCategoria
+  file_name: string
+  file_path: string
+  file_size: number
+  mime_type: string
+  uploaded_by?: string
+  created_at: string
+  public_url?: string
+}
+
+export interface InmuebleCompletitud {
+  tiene_avaluo_vigente: boolean
+  fecha_avaluo_vigente?: string | null
+  tiene_plano_catastral: boolean
+  tiene_escritura: boolean
+  tiene_planos_arq: boolean
+  tiene_titular: boolean
+  titular_es_persona_natural: boolean
+  tiene_valor_mejoras: boolean
+}
+
+export type IncidenciaTipo =
+  | 'sin_avaluo_vigente'
+  | 'avaluo_desactualizado'
+  | 'sin_plano_catastral'
+  | 'sin_escritura'
+  | 'sin_planos_arquitectonicos'
+  | 'sin_titular_registral'
+  | 'titular_persona_natural'
+  | 'sin_valor_mejoras'
+
+export interface RadiografiaReport {
+  scope: { total_inmuebles: number }
+  incidencias_por_tipo: { tipo: IncidenciaTipo; count: number }[]
+  inmuebles: {
+    id: number
+    nombre: string
+    tipo?: string
+    nombre_institucion?: string
+    incidencias: IncidenciaTipo[]
+  }[]
 }

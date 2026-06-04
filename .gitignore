@@ -40,8 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# recursive copy
-Documents/
+# recursive copy (anclado a la raíz: no debe ignorar rutas API anidadas como app/.../[id]/documents/)
+/Documents/
 
 .vercel
 .env*.local

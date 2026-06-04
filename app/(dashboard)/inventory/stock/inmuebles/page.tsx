@@ -20,6 +20,9 @@ import {
   DollarSign, FileText, Download, Search,
 } from 'lucide-react'
 import type { StockInmueble } from '@/types/database'
+import { CompletitudChips } from '@/components/inmuebles/CompletitudChips'
+import { RadiografiaTab } from '@/components/inmuebles/RadiografiaTab'
+import { PENDIENTE_FILTER_OPTIONS, INCIDENCIA_LABELS } from '@/lib/inmueble-constants'
 
 const ESTADO_COLORS: Record<string, string> = {
   'Activo': 'bg-emerald-100 text-emerald-800',
@@ -45,6 +48,7 @@ interface InmuebleFilters {
   avaluo?: string
   registro?: string
   planos_actualizados?: string
+  pendiente?: string[]
 }
 
 export default function InmueblesPage() {
@@ -80,9 +84,19 @@ export default function InmueblesPage() {
     avaluo: filters.avaluo,
     registro: filters.registro,
     planos_actualizados: filters.planos_actualizados,
+    pendiente: filters.pendiente?.length ? filters.pendiente.join(',') : undefined,
     page,
     limit: PAGE_SIZE,
   })
+
+  const togglePendiente = (key: string) => {
+    setFilters((prev) => {
+      const current = prev.pendiente ?? []
+      const next = current.includes(key) ? current.filter((k) => k !== key) : [...current, key]
+      return { ...prev, pendiente: next }
+    })
+    setPage(1)
+  }
 
   const { items: ley7Items, totalCount: ley7TotalCount, isLoading: ley7Loading } = useInmuebleSearch({
     inmueble_type_id: ley7Filters.inmueble_type_id,
@@ -173,6 +187,7 @@ export default function InmueblesPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="inventario">Inventario de Inmuebles</TabsTrigger>
+          <TabsTrigger value="radiografia">Radiografía</TabsTrigger>
           <TabsTrigger value="ley7">Ley 7 2023</TabsTrigger>
           <TabsTrigger value="traspaso">Formulario de Traspaso</TabsTrigger>
         </TabsList>
@@ -347,6 +362,30 @@ export default function InmueblesPage() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Pendiente por… (selección múltiple) */}
+                  <div className="space-y-2 pt-2 border-t">
+                    <Label className="text-xs">Pendiente por… (varios)</Label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {PENDIENTE_FILTER_OPTIONS.map((key) => {
+                        const active = (filters.pendiente ?? []).includes(key)
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => togglePendiente(key)}
+                            className={`rounded px-2 py-1 text-[11px] font-medium border transition-colors ${
+                              active
+                                ? 'bg-amber-500 text-white border-amber-500'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-amber-400'
+                            }`}
+                          >
+                            {INCIDENCIA_LABELS[key]}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -380,6 +419,7 @@ export default function InmueblesPage() {
                               <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Registro</th>
                               <th className="text-right text-xs font-medium text-slate-500 px-4 py-3">Valor</th>
                               <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Estado</th>
+                              <th className="text-left text-xs font-medium text-slate-500 px-4 py-3">Completitud</th>
                               {(isAdmin || isOperador) && (
                                 <th className="text-center text-xs font-medium text-slate-500 px-4 py-3">Acciones</th>
                               )}
@@ -437,6 +477,9 @@ export default function InmueblesPage() {
                                   <Badge className={`text-xs ${ESTADO_COLORS[item.estado] || 'bg-slate-100 text-slate-700'}`}>
                                     {item.estado}
                                   </Badge>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <CompletitudChips completitud={item.completitud} />
                                 </td>
                                 {(isAdmin || isOperador) && (
                                   <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
@@ -605,6 +648,11 @@ export default function InmueblesPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ===== TAB: RADIOGRAFÍA ===== */}
+        <TabsContent value="radiografia">
+          <RadiografiaTab />
         </TabsContent>
 
         {/* ===== TAB: TRASPASO ===== */}

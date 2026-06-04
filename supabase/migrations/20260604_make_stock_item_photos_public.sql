@@ -1,0 +1,11 @@
+-- ============================================================
+-- Migration: make_stock_item_photos_public
+-- Date: 2026-06-04
+-- Description: El bucket 'stock-item-photos' estaba en public=false, pero las
+--   rutas API lo sirven con getPublicUrl (que solo funciona en buckets públicos),
+--   por lo que las fotos de autos/aires/herramientas/inmuebles no cargaban.
+--   Se vuelve público, consistente con 'waste-item-photos', 'inmueble-documents'
+--   e 'inmueble-media'. Los paths usan UUID aleatorio.
+-- NOTE: Applied via Supabase MCP on 2026-06-04.
+-- ============================================================
+UPDATE storage.buckets SET public = true WHERE id = 'stock-item-photos';
